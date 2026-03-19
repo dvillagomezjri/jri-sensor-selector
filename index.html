@@ -35,11 +35,14 @@
 <h2>JRI Smart Sensor Selector</h2>
 
 <div class="controls">
-  <label>Min Temp: <span id="minVal">0</span>°C</label><br>
-  <input type="range" id="minTemp" min="-200" max="200" value="0" oninput="updateValues()"><br>
 
-  <label>Max Temp: <span id="maxVal">50</span>°C</label><br>
-  <input type="range" id="maxTemp" min="-200" max="300" value="50" oninput="updateValues()"><br>
+  <label>Min Temp (°C):</label><br>
+  <input type="range" id="minTemp" min="-200" max="200" value="0" oninput="syncFromSlider()">
+  <input type="number" id="minTempInput" value="0" oninput="syncFromInput()"><br><br>
+
+  <label>Max Temp (°C):</label><br>
+  <input type="range" id="maxTemp" min="-200" max="300" value="50" oninput="syncFromSlider()">
+  <input type="number" id="maxTempInput" value="50" oninput="syncFromInput()"><br><br>
 
   <label>Humidity:</label>
   <select id="humidity">
@@ -76,9 +79,30 @@ const products = [
   {name:"Nova SPY T Ambient", min:-40, max:80, humidity:false, accValue:"±0.4°C", accScore:7}
 ];
 
-function updateValues() {
-  document.getElementById("minVal").innerText = document.getElementById("minTemp").value;
-  document.getElementById("maxVal").innerText = document.getElementById("maxTemp").value;
+function syncFromSlider() {
+  let min = parseFloat(document.getElementById("minTemp").value);
+  let max = parseFloat(document.getElementById("maxTemp").value);
+
+  // Prevent invalid range
+  if (min > max) min = max;
+
+  document.getElementById("minTemp").value = min;
+  document.getElementById("minTempInput").value = min;
+  document.getElementById("maxTempInput").value = max;
+}
+
+function syncFromInput() {
+  let min = parseFloat(document.getElementById("minTempInput").value);
+  let max = parseFloat(document.getElementById("maxTempInput").value);
+
+  // Prevent invalid range
+  if (min > max) min = max;
+
+  document.getElementById("minTempInput").value = min;
+  document.getElementById("maxTempInput").value = max;
+
+  document.getElementById("minTemp").value = min;
+  document.getElementById("maxTemp").value = max;
 }
 
 function search() {
