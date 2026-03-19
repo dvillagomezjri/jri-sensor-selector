@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JRI Smart Sensor Selector</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input { margin: 5px; }
+    .card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    .highlight { background: #f5f5f5; }
+  </style>
+</head>
+<body>
+
+<h2>JRI Smart Sensor Selector (v3)</h2>
+
+<label>Min Temp (°C):</label>
+<input type="number" id="minTemp"><br>
+
+<label>Max Temp (°C):</label>
+<input type="number" id="maxTemp"><br>
+
+<label>Humidity Required:</label>
+<input type="checkbox" id="humidity"><br>
+
+<button onclick="search()">Search</button>
+
+<h3>⭐ Recommended</h3>
+<div id="recommendations"></div>
+
+<h3>📋 All Matches</h3>
+<div id="results"></div>
+
+<script>
+const products = [
+  {name:"Nano SPY T1", min:-40, max:85, humidity:false, accuracy:7},
+  {name:"Nano SPY TH", min:-30, max:70, humidity:true, accuracy:7},
+  {name:"Nano SPY T2", min:-50, max:105, humidity:false, accuracy:8},
+  {name:"Nano SPY T3", min:-200, max:200, humidity:false, accuracy:9},
+  {name:"Nano SPY Reference", min:-196, max:150, humidity:false, accuracy:10},
+  {name:"Nano SPY TH High Accuracy", min:-40, max:85, humidity:true, accuracy:9},
+  {name:"Nano SPY Universal", min:-200, max:300, humidity:true, accuracy:8},
+  {name:"Nova SPY T Ambient", min:-40, max:80, humidity:false, accuracy:7}
+];
+
+function search() {
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const humidity = document.getElementById("humidity").checked;
+
+  const matches = products.filter(p => {
+    return (p.min <= minT && p.max >= maxT) &&
+           (!humidity || p.humidity);
+  });
+
+  if (matches.length === 0) {
+    document.getElementById("results").innerHTML = "No matches";
+    document.getElementById("recommendations").innerHTML = "";
+    return;
+  }
+
+  // scoring
+  matches.forEach(p => {
+    const rangeSize = p.max - p.min;
+
+    // Performance = accuracy
+    p.performanceScore = p.accuracy;
+
+    // Value = penalize large ranges (overkill)
+    p.valueScore = p.accuracy - (rangeSize > 200 ? 3 : rangeSize > 100 ? 2 : 0);
+
+    // Balanced = mix
+    p.balancedScore = (p.accuracy * 0.7) - (rangeSize > 150 ? 1 : 0);
+  });
+
+  // sort
+  const bestPerformance = [...matches].sort((a,b)=>b.performanceScore-a.performanceScore)[0];
+  const bestValue = [...matches].sort((a,b)=>b.valueScore-a.valueScore)[0];
+  const bestBalanced = [...matches].sort((a,b)=>b.balancedScore-a.balancedScore)[0];
+
+  // display recommendations
+  document.getElementById("recommendations").innerHTML = `
+    <div class="card highlight">
+      <b>🏆 Best Performance</b><br>${bestPerformance.name}
+    </div>
+    <div class="card highlight">
+      <b>💰 Best Value</b><br>${bestValue.name}
+    </div>
+    <div class="card highlight">
+      <b>⚖️ Balanced Choice</b><br>${bestBalanced.name}
+    </div>
+  `;
+
+  // display all
+  document.getElementById("results").innerHTML =
+    matches.map(p => `
+      <div class="card">
+        <b>${p.name}</b><br>
+        Temp: ${p.min} → ${p.max} °C<br>
+        Humidity: ${p.humidity ? "Yes" : "No"}<br>
+        Accuracy Score: ${p.accuracy}
+      </div>
+    `).join("");
+}
+</script>
+
+</body>
+</html>
