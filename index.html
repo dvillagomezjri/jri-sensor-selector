@@ -2,32 +2,53 @@
 <html>
 <head>
   <title>JRI Smart Sensor Selector</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input { margin: 5px; }
+    body { font-family: Arial; padding: 20px; background:#f7f7f7; }
+    h2 { margin-bottom: 10px; }
+    .container { max-width: 900px; margin: auto; }
     .card {
-      border: 1px solid #ccc;
-      padding: 10px;
+      background: white;
+      padding: 15px;
       margin-top: 10px;
-      border-radius: 8px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .highlight { background: #f5f5f5; }
+    .highlight { border-left: 5px solid #007BFF; }
+    .controls { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
+    button {
+      margin-top:10px;
+      padding:8px 12px;
+      border:none;
+      border-radius:5px;
+      cursor:pointer;
+      background:#007BFF;
+      color:white;
+    }
+    textarea { width:100%; margin-top:10px; }
   </style>
 </head>
 <body>
 
-<h2>JRI Smart Sensor Selector (v3)</h2>
+<div class="container">
 
-<label>Min Temp (°C):</label>
-<input type="number" id="minTemp"><br>
+<h2>JRI Smart Sensor Selector</h2>
 
-<label>Max Temp (°C):</label>
-<input type="number" id="maxTemp"><br>
+<div class="controls">
+  <label>Min Temp: <span id="minVal">0</span>°C</label><br>
+  <input type="range" id="minTemp" min="-200" max="200" value="0" oninput="updateValues()"><br>
 
-<label>Humidity Required:</label>
-<input type="checkbox" id="humidity"><br>
+  <label>Max Temp: <span id="maxVal">50</span>°C</label><br>
+  <input type="range" id="maxTemp" min="-200" max="300" value="50" oninput="updateValues()"><br>
 
-<button onclick="search()">Search</button>
+  <label>Humidity:</label>
+  <select id="humidity">
+    <option value="no">Not Required</option>
+    <option value="yes">Required</option>
+  </select><br>
+
+  <button onclick="search()">Find Sensors</button>
+</div>
 
 <h3>⭐ Recommended</h3>
 <div id="recommendations"></div>
@@ -35,76 +56,79 @@
 <h3>📋 All Matches</h3>
 <div id="results"></div>
 
+<h3>📝 Notes</h3>
+<textarea id="notes" rows="4" placeholder="Add customer notes here..."></textarea><br>
+
+<button onclick="copyText()">Copy Recommendation</button>
+<button onclick="exportPDF()">Export to PDF</button>
+
+</div>
+
 <script>
 const products = [
-  {name:"Nano SPY T1", min:-40, max:85, humidity:false, accuracy:7},
-  {name:"Nano SPY TH", min:-30, max:70, humidity:true, accuracy:7},
-  {name:"Nano SPY T2", min:-50, max:105, humidity:false, accuracy:8},
-  {name:"Nano SPY T3", min:-200, max:200, humidity:false, accuracy:9},
-  {name:"Nano SPY Reference", min:-196, max:150, humidity:false, accuracy:10},
-  {name:"Nano SPY TH High Accuracy", min:-40, max:85, humidity:true, accuracy:9},
-  {name:"Nano SPY Universal", min:-200, max:300, humidity:true, accuracy:8},
-  {name:"Nova SPY T Ambient", min:-40, max:80, humidity:false, accuracy:7}
+  {name:"Nano SPY TH", min:-30, max:70, humidity:true, accValue:"±0.4°C / ±4-5% RH", accScore:7},
+  {name:"Nano SPY TH High Accuracy", min:-40, max:85, humidity:true, accValue:"High accuracy probe", accScore:9},
+  {name:"Nano SPY T1", min:-40, max:85, humidity:false, accValue:"±0.4°C / ±0.5°C", accScore:7},
+  {name:"Nano SPY T2", min:-50, max:105, humidity:false, accValue:"±0.3°C / ±0.5°C", accScore:8},
+  {name:"Nano SPY T3", min:-200, max:200, humidity:false, accValue:"±0.2–0.5°C", accScore:9},
+  {name:"Nano SPY Reference", min:-196, max:150, humidity:false, accValue:"±0.15°C to ±0.6°C", accScore:10},
+  {name:"Nano SPY Universal", min:-200, max:300, humidity:true, accValue:"±0.2–0.5°C", accScore:8},
+  {name:"Nova SPY T Ambient", min:-40, max:80, humidity:false, accValue:"±0.4°C", accScore:7}
 ];
+
+function updateValues() {
+  document.getElementById("minVal").innerText = document.getElementById("minTemp").value;
+  document.getElementById("maxVal").innerText = document.getElementById("maxTemp").value;
+}
 
 function search() {
   const minT = parseFloat(document.getElementById("minTemp").value);
   const maxT = parseFloat(document.getElementById("maxTemp").value);
-  const humidity = document.getElementById("humidity").checked;
+  const humidity = document.getElementById("humidity").value === "yes";
 
-  const matches = products.filter(p => {
-    return (p.min <= minT && p.max >= maxT) &&
-           (!humidity || p.humidity);
-  });
+  const matches = products.filter(p =>
+    p.min <= minT && p.max >= maxT &&
+    (!humidity || p.humidity)
+  );
 
-  if (matches.length === 0) {
-    document.getElementById("results").innerHTML = "No matches";
-    document.getElementById("recommendations").innerHTML = "";
-    return;
-  }
-
-  // scoring
   matches.forEach(p => {
     const rangeSize = p.max - p.min;
-
-    // Performance = accuracy
-    p.performanceScore = p.accuracy;
-
-    // Value = penalize large ranges (overkill)
-    p.valueScore = p.accuracy - (rangeSize > 200 ? 3 : rangeSize > 100 ? 2 : 0);
-
-    // Balanced = mix
-    p.balancedScore = (p.accuracy * 0.7) - (rangeSize > 150 ? 1 : 0);
+    p.performance = p.accScore;
+    p.value = p.accScore - (rangeSize > 200 ? 3 : rangeSize > 100 ? 2 : 0);
+    p.balanced = (p.accScore * 0.7) - (rangeSize > 150 ? 1 : 0);
   });
 
-  // sort
-  const bestPerformance = [...matches].sort((a,b)=>b.performanceScore-a.performanceScore)[0];
-  const bestValue = [...matches].sort((a,b)=>b.valueScore-a.valueScore)[0];
-  const bestBalanced = [...matches].sort((a,b)=>b.balancedScore-a.balancedScore)[0];
+  const bestPerf = [...matches].sort((a,b)=>b.performance-a.performance)[0];
+  const bestValue = [...matches].sort((a,b)=>b.value-a.value)[0];
+  const bestBalanced = [...matches].sort((a,b)=>b.balanced-a.balanced)[0];
 
-  // display recommendations
   document.getElementById("recommendations").innerHTML = `
-    <div class="card highlight">
-      <b>🏆 Best Performance</b><br>${bestPerformance.name}
-    </div>
-    <div class="card highlight">
-      <b>💰 Best Value</b><br>${bestValue.name}
-    </div>
-    <div class="card highlight">
-      <b>⚖️ Balanced Choice</b><br>${bestBalanced.name}
-    </div>
+    <div class="card highlight"><b>🏆 Best Performance</b><br>${bestPerf?.name || "-"}</div>
+    <div class="card highlight"><b>💰 Best Value</b><br>${bestValue?.name || "-"}</div>
+    <div class="card highlight"><b>⚖️ Balanced Choice</b><br>${bestBalanced?.name || "-"}</div>
   `;
 
-  // display all
   document.getElementById("results").innerHTML =
     matches.map(p => `
       <div class="card">
         <b>${p.name}</b><br>
         Temp: ${p.min} → ${p.max} °C<br>
         Humidity: ${p.humidity ? "Yes" : "No"}<br>
-        Accuracy Score: ${p.accuracy}
+        Accuracy: ${p.accValue}
       </div>
     `).join("");
+}
+
+function copyText() {
+  const text = document.getElementById("recommendations").innerText +
+               "\nNotes:\n" + document.getElementById("notes").value;
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+}
+
+function exportPDF() {
+  const element = document.body;
+  html2pdf().from(element).save("JRI_Recommendation.pdf");
 }
 </script>
 
