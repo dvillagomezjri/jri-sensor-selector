@@ -1,199 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>JRI Smart Sensor Selector</title>
+  <meta charset="UTF-8">
+  <title>JRI Smart Selector v1.3 - USD</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-
-<style>
-body { font-family: Arial; background:#f4f6f8; }
-.container { max-width: 1000px; margin:auto; padding:20px; }
-.card { background:white; padding:15px; margin-top:10px; border-radius:10px; }
-.highlight { border-left:5px solid #4CAF50; }
-.controls { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
-button { background:#4CAF50; color:white; padding:10px; border:none; border-radius:8px; margin-top:10px; cursor:pointer;}
-small { color:gray; }
-</style>
+  <style>
+    :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #333; }
+    .container { max-width: 1200px; margin: auto; padding: 20px; }
+    .dashboard { display: grid; grid-template-columns: 360px 1fr; gap: 20px; }
+    .controls, .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+    .card.highlight { border-top: 6px solid var(--jri-green); position: relative; }
+    .badge { position: absolute; top: 10px; right: 10px; background: #e3f2fd; color: var(--jri-blue); padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
+    input, select, textarea { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+    button { width: 100%; background: var(--jri-blue); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    button.export { background: #607d8b; margin-top: 10px; }
+    .price-tag { color: var(--jri-blue); font-weight: bold; font-size: 1.2rem; margin-top: 5px; }
+    .service-item { font-size: 0.85rem; color: #666; font-style: italic; }
+  </style>
 </head>
-
 <body>
+
 <div class="container">
+  <header>
+    <h1 style="color: var(--jri-blue);">JRI Smart Sensor Selector</h1>
+    <p>v1.3 | 2026 USD Pricing Structure</p>
+  </header>
 
-<h2>JRI Smart Sensor Selector</h2>
+  <div class="dashboard">
+    <div class="controls">
+      <h3>Customer Requirements</h3>
+      <label>Min Temp (°C)</label>
+      <input type="number" id="minTemp" value="2">
+      
+      <label>Max Temp (°C)</label>
+      <input type="number" id="maxTemp" value="8">
 
-<div class="controls">
+      <label>Humidity?</label>
+      <select id="humidity">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
 
-<b>Temperature Range</b><br>
-Min: <input type="number" id="minTemp" value="0" min="-200">
-Max: <input type="number" id="maxTemp" value="50" min="-200"><br><br>
+      <label>Technology</label>
+      <select id="tech">
+        <option value="any">Any (Best Match)</option>
+        <option value="nanospy">Nano SPY (2.4GHz)</option>
+        <option value="loraspy">LoRa SPY (Long Range)</option>
+      </select>
 
-<b>Humidity Required</b><br>
-<select id="humidity">
-<option value="no">No</option>
-<option value="yes">Yes</option>
-</select>
+      <label>Application Weighting</label>
+      <select id="application">
+        <option value="pharma">Pharma (High Accuracy Focus)</option>
+        <option value="food">Food (HACCP Value Focus)</option>
+        <option value="logistics">Logistics (Robustness/Range)</option>
+      </select>
 
-<br><br>
+      <label>Include ISO Calibration Certificate?</label>
+      <select id="calibration">
+        <option value="0">No (Factory Only)</option>
+        <option value="55">Yes (+ $55.00 USD/point)</option>
+      </select>
 
-<b>Application</b><br>
-<select id="application">
-<option value="general">General</option>
-<option value="pharma">Pharma</option>
-<option value="food">Food</option>
-<option value="logistics">Logistics</option>
-</select>
+      <label>Include Mounting Clips?</label>
+      <select id="clips">
+        <option value="0">No</option>
+        <option value="29">Yes (+ $29.00 USD)</option>
+      </select>
 
-<br>
-<button onclick="search()">Find Sensors</button>
+      <button onclick="search()">Find Best Solutions</button>
+      <button class="export" onclick="exportPDF()">Export USD Quote PDF</button>
+    </div>
 
-</div>
+    <div id="main-display">
+      <div id="export-area">
+        <h3>⭐ Recommended JRI Systems</h3>
+        <div id="recommendations" class="recommendation-grid"></div>
 
-<h3>⭐ Recommended</h3>
-<div id="recommendations"></div>
-
-<h3>📋 All Matches</h3>
-<div id="results"></div>
-
-<textarea id="notes" placeholder="Notes..."></textarea>
-<button onclick="exportPDF()">Export PDF</button>
-
+        <h3>📋 Full Comparison List (Price/Score)</h3>
+        <div id="results"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-
-// 🔬 REAL PROBE DATABASE
+// 🔬 DATA FROM JRI 2026 USD PRICE LIST 
 const probes = [
-{
-ref:"13984",
-name:"Low Temp Sensor",
-min:-200, max:0,
-accuracy:"±0.5°C to ±0.2°C",
-accScore:8,
-humidity:false
-},
-{
-ref:"13947",
-name:"Reference Probe",
-min:-90, max:180,
-accuracy:"±0.15°C",
-accScore:10,
-humidity:false
-},
-{
-ref:"14129",
-name:"Reference Probe Short",
-min:-40, max:80,
-accuracy:"±0.15°C",
-accScore:10,
-humidity:false
-},
-{
-ref:"13993",
-name:"Temp Probe Long",
-min:-40, max:80,
-accuracy:"±0.2°C",
-accScore:9,
-humidity:false
-},
-{
-ref:"13912",
-name:"Temp Probe Short",
-min:-40, max:80,
-accuracy:"±0.2°C",
-accScore:9,
-humidity:false
-},
-{
-ref:"12347",
-name:"Temp + Humidity Probe",
-min:-30, max:70,
-accuracy:"±0.3°C / RH",
-accScore:8,
-humidity:true
-}
+  {ref:"13984", name:"Low Temp Probe", min:-200, max:0, accuracy:"±0.5°C", accScore:8, price: 95.00},
+  {ref:"13947", name:"Reference Probe", min:-90, max:180, accuracy:"±0.15°C", accScore:10, price: 210.00},
+  {ref:"14129", name:"Ref Probe Short", min:-40, max:80, accuracy:"±0.15°C", accScore:10, price: 185.00},
+  {ref:"12347", name:"T/H Probe", min:-30, max:70, accuracy:"±0.3°C / RH", accScore:8, price: 145.00, humidity:true}
 ];
 
-// 🧠 BASE PRODUCTS
 const baseProducts = [
-{name:"Nano SPY TH", min:-30, max:70, humidity:true, accuracy:"±0.4°C", accScore:7},
-{name:"Nano SPY TH High Accuracy", min:-40, max:85, humidity:true, accuracy:"High accuracy", accScore:9},
-{name:"Nano SPY T2", min:-50, max:105, humidity:false, accuracy:"±0.3°C", accScore:8},
-{name:"Nano SPY T3", min:-200, max:200, humidity:false, accuracy:"±0.2–0.5°C", accScore:9}
+  // Nano SPY Series 
+  {name:"Nano SPY TH", tech:"nanospy", min:-30, max:70, humidity:true, accuracy:"±0.4°C", accScore:7, price: 188.00, type:"internal"},
+  {name:"Nano SPY T1", tech:"nanospy", min:-40, max:85, humidity:false, accuracy:"±0.4°C", accScore:7, price: 119.00, type:"internal"},
+  {name:"Nano SPY T2 (30cm)", tech:"nanospy", min:-50, max:105, humidity:false, accuracy:"±0.3°C", accScore:8, price: 217.00, type:"internal"},
+  {name:"Nova SPY Digital", tech:"nanospy", min:-40, max:80, humidity:false, accuracy:"Digital", accScore:0, price: 166.00, type:"digital_base"},
+  
+  // LoRa SPY Series 
+  {name:"LoRa SPY T0", tech:"loraspy", min:-30, max:70, humidity:false, accuracy:"±0.5°C", accScore:6, price: 185.00, type:"internal"},
+  {name:"LoRa SPY TH", tech:"loraspy", min:-30, max:70, humidity:true, accuracy:"±0.4°C", accScore:7, price: 215.00, type:"internal"},
+  {name:"LoRa SPY Digital", tech:"loraspy", min:-40, max:80, humidity:false, accuracy:"Digital", accScore:0, price: 210.00, type:"digital_base"}
 ];
-
-// 🔧 Build Nova SPY Digital with REAL probes
-function buildDigitalProducts(){
-return probes.map(p => ({
-name:`Nova SPY Digital + ${p.name}`,
-ref:p.ref,
-min:p.min,
-max:p.max,
-humidity:p.humidity,
-accuracy:p.accuracy,
-accScore:p.accScore
-}));
-}
 
 function search(){
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const humReq = document.getElementById("humidity").value === "yes";
+  const techPref = document.getElementById("tech").value;
+  const calFee = parseFloat(document.getElementById("calibration").value);
+  const clipFee = parseFloat(document.getElementById("clips").value);
+  const app = document.getElementById("application").value;
 
-const minT = parseFloat(document.getElementById("minTemp").value);
-const maxT = parseFloat(document.getElementById("maxTemp").value);
-const humidity = document.getElementById("humidity").value==="yes";
-const app = document.getElementById("application").value;
+  let allMatches = [];
 
-// combine all
-let products = [...baseProducts, ...buildDigitalProducts()];
+  baseProducts.forEach(base => {
+    if (techPref !== "any" && base.tech !== techPref) return;
 
-// filter
-let matches = products.filter(p =>
-p.min<=minT && p.max>=maxT &&
-(!humidity || p.humidity)
-);
+    if (base.type === "internal") {
+      if (base.min <= minT && base.max >= maxT && (!humReq || base.humidity)) {
+        allMatches.push({...base, totalPrice: base.price + calFee + clipFee});
+      }
+    } else {
+      probes.forEach(probe => {
+        if (probe.min <= minT && probe.max >= maxT && (!humReq || probe.humidity)) {
+          allMatches.push({
+            name: `${base.name} + ${probe.name}`,
+            tech: base.tech,
+            ref: probe.ref,
+            min: probe.min,
+            max: probe.max,
+            accuracy: probe.accuracy,
+            accScore: probe.accScore,
+            totalPrice: base.price + probe.price + calFee + clipFee,
+            humidity: probe.humidity
+          });
+        }
+      });
+    }
+  });
 
-// scoring logic
-matches.forEach(p=>{
-let score = p.accScore;
+  allMatches.forEach(p => {
+    const priceWeight = Math.max(0, 15 - (p.totalPrice / 50));
+    p.finalScore = (app === "pharma") ? (p.accScore * 3) + priceWeight : p.accScore + (priceWeight * 2);
+  });
 
-// application weighting
-if(app==="pharma") score += p.accScore;
-if(app==="food") score -= (p.accScore > 8 ? 2 : 0);
-if(app==="logistics") score += (p.max-p.min)>150?2:0;
+  allMatches.sort((a,b) => b.finalScore - a.finalScore);
+  render(allMatches, calFee > 0, clipFee > 0);
+}
 
-p.score = score;
-});
+function render(matches, hasCal, hasClips) {
+  const top = matches.slice(0,3);
+  const serviceText = `${hasCal ? "+ ISO Cal " : ""}${hasClips ? "+ Clip " : ""}`;
 
-// sort
-matches.sort((a,b)=>b.score-a.score);
+  document.getElementById("recommendations").innerHTML = top.map((p, i) => `
+    <div class="card highlight">
+      <div class="badge">${p.tech.toUpperCase()}</div>
+      <b style="color:var(--jri-blue)">${p.name}</b><br>
+      <small>${p.ref ? "Probe Ref: " + p.ref : "Internal Sensor"}</small><hr>
+      <strong>Accuracy:</strong> ${p.accuracy}<br>
+      <div class="price-tag">$${p.totalPrice.toFixed(2)} USD</div>
+      <div class="service-item">${serviceText} Included</div>
+    </div>
+  `).join("");
 
-// top 3
-const top = matches.slice(0,3);
-
-document.getElementById("recommendations").innerHTML =
-top.map(p=>`
-<div class="card highlight">
-<b>${p.name}</b><br>
-${p.ref ? "Ref: "+p.ref+"<br>" : ""}
-Accuracy: ${p.accuracy}
-</div>
-`).join("");
-
-// all results
-document.getElementById("results").innerHTML =
-matches.map(p=>`
-<div class="card">
-<b>${p.name}</b><br>
-${p.ref ? "Ref: "+p.ref+"<br>" : ""}
-Range: ${p.min} → ${p.max} °C<br>
-Humidity: ${p.humidity ? "Yes":"No"}<br>
-Accuracy: ${p.accuracy}
-</div>
-`).join("");
+  document.getElementById("results").innerHTML = matches.map(p => `
+    <div class="card" style="margin-bottom:8px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items:center;">
+      <span><b>${p.name}</b> (${p.tech})</span>
+      <span class="price-tag" style="font-size:0.9rem;">$${p.totalPrice.toFixed(2)}</span>
+    </div>
+  `).join("");
 }
 
 function exportPDF(){
-html2pdf().from(document.body).save("JRI_Recommendation.pdf");
+  const element = document.getElementById('export-area');
+  html2pdf().from(element).save("JRI_USD_Recommendation.pdf");
 }
-
 </script>
-
 </body>
 </html>
