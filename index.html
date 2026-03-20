@@ -3,31 +3,91 @@
 <head>
   <title>JRI Smart Sensor Selector</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+
   <style>
-    body { font-family: Arial; padding: 20px; background:#f7f7f7; }
-    h2 { margin-bottom: 10px; }
-    .container { max-width: 900px; margin: auto; }
+    body {
+      font-family: Inter, Arial;
+      background: #f4f6f8;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    input[type=number] {
+      width: 90px;
+      padding: 6px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    select {
+      padding: 6px;
+      border-radius: 6px;
+      margin-top: 5px;
+    }
+
     .card {
       background: white;
       padding: 15px;
       margin-top: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
     }
-    .highlight { border-left: 5px solid #007BFF; }
-    .controls { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
+
+    .highlight {
+      border-left: 5px solid #4CAF50;
+    }
+
     button {
-      margin-top:10px;
-      padding:8px 12px;
-      border:none;
-      border-radius:5px;
-      cursor:pointer;
-      background:#007BFF;
-      color:white;
+      background: #4CAF50;
+      color: white;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
     }
-    textarea { width:100%; margin-top:10px; }
+
+    button:hover {
+      background: #43a047;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
   </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -36,21 +96,32 @@
 
 <div class="controls">
 
-  <label>Min Temp (°C):</label><br>
+  <label><b>Temperature Range</b></label>
+
+  <div class="row">
+    <span>Min:</span>
+    <input type="number" id="minTempInput" value="0" min="-200" max="200" step="1" oninput="syncFromInput()">
+    <span>°C</span>
+  </div>
+
   <input type="range" id="minTemp" min="-200" max="200" value="0" oninput="syncFromSlider()">
-  <input type="number" id="minTempInput" value="0" oninput="syncFromInput()"><br><br>
 
-  <label>Max Temp (°C):</label><br>
+  <div class="row">
+    <span>Max:</span>
+    <input type="number" id="maxTempInput" value="50" min="-200" max="300" step="1" oninput="syncFromInput()">
+    <span>°C</span>
+  </div>
+
   <input type="range" id="maxTemp" min="-200" max="300" value="50" oninput="syncFromSlider()">
-  <input type="number" id="maxTempInput" value="50" oninput="syncFromInput()"><br><br>
 
-  <label>Humidity:</label>
+  <label><b>Humidity</b></label><br>
   <select id="humidity">
     <option value="no">Not Required</option>
     <option value="yes">Required</option>
   </select><br>
 
   <button onclick="search()">Find Sensors</button>
+
 </div>
 
 <h3>⭐ Recommended</h3>
@@ -60,7 +131,7 @@
 <div id="results"></div>
 
 <h3>📝 Notes</h3>
-<textarea id="notes" rows="4" placeholder="Add customer notes here..."></textarea><br>
+<textarea id="notes" rows="4" placeholder="Add customer notes here..."></textarea>
 
 <button onclick="copyText()">Copy Recommendation</button>
 <button onclick="exportPDF()">Export to PDF</button>
@@ -83,7 +154,6 @@ function syncFromSlider() {
   let min = parseFloat(document.getElementById("minTemp").value);
   let max = parseFloat(document.getElementById("maxTemp").value);
 
-  // Prevent invalid range
   if (min > max) min = max;
 
   document.getElementById("minTemp").value = min;
@@ -95,11 +165,10 @@ function syncFromInput() {
   let min = parseFloat(document.getElementById("minTempInput").value);
   let max = parseFloat(document.getElementById("maxTempInput").value);
 
-  // Prevent invalid range
-  if (min > max) min = max;
+  if (isNaN(min)) min = -200;
+  if (isNaN(max)) max = 300;
 
-  document.getElementById("minTempInput").value = min;
-  document.getElementById("maxTempInput").value = max;
+  if (min > max) min = max;
 
   document.getElementById("minTemp").value = min;
   document.getElementById("maxTemp").value = max;
@@ -115,6 +184,12 @@ function search() {
     (!humidity || p.humidity)
   );
 
+  if (matches.length === 0) {
+    document.getElementById("recommendations").innerHTML = "No matches";
+    document.getElementById("results").innerHTML = "";
+    return;
+  }
+
   matches.forEach(p => {
     const rangeSize = p.max - p.min;
     p.performance = p.accScore;
@@ -127,9 +202,9 @@ function search() {
   const bestBalanced = [...matches].sort((a,b)=>b.balanced-a.balanced)[0];
 
   document.getElementById("recommendations").innerHTML = `
-    <div class="card highlight"><b>🏆 Best Performance</b><br>${bestPerf?.name || "-"}</div>
-    <div class="card highlight"><b>💰 Best Value</b><br>${bestValue?.name || "-"}</div>
-    <div class="card highlight"><b>⚖️ Balanced Choice</b><br>${bestBalanced?.name || "-"}</div>
+    <div class="card highlight"><b>🏆 Best Performance</b><br>${bestPerf.name}</div>
+    <div class="card highlight"><b>💰 Best Value</b><br>${bestValue.name}</div>
+    <div class="card highlight"><b>⚖️ Balanced Choice</b><br>${bestBalanced.name}</div>
   `;
 
   document.getElementById("results").innerHTML =
@@ -145,7 +220,7 @@ function search() {
 
 function copyText() {
   const text = document.getElementById("recommendations").innerText +
-               "\nNotes:\n" + document.getElementById("notes").value;
+               "\n\nNotes:\n" + document.getElementById("notes").value;
   navigator.clipboard.writeText(text);
   alert("Copied!");
 }
