@@ -2,111 +2,125 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>JRI Smart Selector v1.6</title>
+  <title>JRI Smart Selector v1.7</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
-    :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; --legacy: #9e9e9e; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #333; }
-    .container { max-width: 1300px; margin: auto; padding: 20px; }
-    .dashboard { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
-    .controls, .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; --legacy: #607d8b; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
+    .container { max-width: 1400px; margin: auto; padding: 20px; }
     
-    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; }
-    .card.highlight { border-top: 6px solid var(--jri-green); position: relative; }
+    /* Layout */
+    .dashboard { display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
+    .controls, .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
     
-    .tech-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; color: white; margin-bottom: 8px; }
+    /* Product Cards */
+    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+    .card { position: relative; border: 1px solid #eee; display: flex; flex-direction: column; }
+    .card.highlight { border-top: 6px solid var(--jri-green); }
+    
+    /* Images */
+    .img-container { width: 100%; height: 160px; background: #fff; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f0f0f0; }
+    .img-container img { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+    /* Tags & Labels */
+    .tech-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: white; margin-bottom: 10px; text-transform: uppercase; }
     .tag-nova { background: var(--nova); }
     .tag-nano { background: var(--nano); }
     .tag-lora { background: var(--lora); }
     .tag-legacy { background: var(--legacy); }
 
-    .legacy-warning { color: #d32f2f; font-size: 0.75rem; font-weight: bold; margin-top: 5px; background: #ffebee; padding: 5px; border-radius: 4px; border: 1px solid #ffcdd2; }
+    .ref-no { font-family: 'Courier New', monospace; color: #777; font-size: 0.85rem; margin-bottom: 5px; }
+    .legacy-banner { background: #fff3e0; color: #e65100; font-size: 0.75rem; padding: 8px; border-radius: 6px; margin: 10px 0; border: 1px solid #ffe0b2; line-height: 1.4; }
 
-    .breakdown { font-size: 0.85rem; background: #fdfdfd; padding: 12px; border-radius: 6px; margin-top: 10px; border: 1px solid #eee; }
-    .breakdown-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-    .ref-text { color: #777; font-family: 'Courier New', monospace; font-size: 0.8rem; }
-    .total-row { border-top: 2px solid var(--jri-blue); padding-top: 8px; font-weight: bold; color: var(--jri-blue); font-size: 1rem; }
+    /* Pricing Table */
+    .breakdown { background: #f9fafb; padding: 15px; border-radius: 8px; margin-top: auto; border: 1px solid #edf2f7; }
+    .breakdown-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
+    .total-row { border-top: 2px solid var(--jri-blue); padding-top: 10px; margin-top: 5px; font-weight: bold; color: var(--jri-blue); font-size: 1.1rem; }
     
-    input, select, textarea { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-    button { width: 100%; background: var(--jri-blue); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    h3 { margin-top: 0; color: var(--jri-blue); border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    /* Form Elements */
+    input, select, textarea { width: 100%; padding: 12px; margin: 8px 0 18px 0; border: 1px solid #cbd5e0; border-radius: 8px; }
+    button { width: 100%; background: var(--jri-blue); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #00447a; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <header>
-    <h1 style="color: var(--jri-blue);">JRI Smart Sensor Selector</h1>
-    <p>v1.6 | Full Catalog + Legacy Support (Ref 13491)</p>
+  <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
+    <div>
+      <h1 style="color: var(--jri-blue); margin:0;">JRI MySirius System Builder</h1>
+      <p style="margin:5px 0 0 0; color: #666;">2026 USD Pricing & Technical Selector</p>
+    </div>
+    <div style="text-align: right; color: var(--jri-blue); font-weight: bold;">JRI-MMS USA</div>
   </header>
 
   <div class="dashboard">
     <div class="controls">
-      <h3>Search Filters</h3>
-      <label>Temperature Range (°C)</label>
+      <h3>1. Environmental Specs</h3>
+      <label>Target Temperature (°C)</label>
       <div style="display:flex; gap:10px;">
-        <input type="number" id="minTemp" value="2">
-        <input type="number" id="maxTemp" value="8">
+        <input type="number" id="minTemp" value="2" title="Minimum operating temp">
+        <input type="number" id="maxTemp" value="8" title="Maximum operating temp">
       </div>
 
-      <label>Humidity Required?</label>
+      <label>Humidity Monitoring?</label>
       <select id="humidity">
-        <option value="no">No</option>
-        <option value="yes">Yes</option>
+        <option value="no">Temperature Only</option>
+        <option value="yes">Temperature + Humidity</option>
       </select>
 
-      <label>Technology Stack</label>
+      <h3>2. System Preferences</h3>
+      <label>Radio Technology</label>
       <select id="tech">
-        <option value="any">Compare All Technologies</option>
-        <option value="nova">Nova SPY (Industrial)</option>
-        <option value="nano">Nano SPY (Compact)</option>
-        <option value="lora">LoRa SPY (Long Range)</option>
+        <option value="any">Compare All Networks</option>
+        <option value="nova">Nova SPY (2.4GHz High Power)</option>
+        <option value="nano">Nano SPY (2.4GHz Compact)</option>
+        <option value="lora">LoRa SPY (868MHz Long Range)</option>
       </select>
 
-      <label>Include Discontinued/Legacy Models?</label>
+      <label>Hardware Lifecycle</label>
       <select id="includeLegacy">
-        <option value="yes">Yes (Show Ref 13491)</option>
-        <option value="no">No (New Sales Only)</option>
+        <option value="yes">Include Legacy Support (Ref 13491)</option>
+        <option value="no">Current 2026 Models Only</option>
       </select>
 
-      <button onclick="search()">Update Search</button>
-      <button style="margin-top:10px; background:#607d8b;" onclick="exportPDF()">Export PDF Quote</button>
+      <button onclick="search()">Generate System Quote</button>
+      <button style="margin-top:10px; background:#4a5568;" onclick="exportPDF()">Save as Client PDF</button>
     </div>
 
     <div id="main-display">
-      <div id="export-area">
-        <h3>⭐ Best Match Systems</h3>
+        <h2 style="color: var(--jri-blue); border-bottom: 2px solid #eee; padding-bottom: 10px;">Best Fit Configurations</h2>
         <div id="recommendations" class="recommendation-grid"></div>
 
-        <h3>📋 Full Catalog Results</h3>
-        <div id="results"></div>
-      </div>
+        <h2 style="margin-top:40px; color: var(--jri-blue); border-bottom: 2px solid #eee; padding-bottom: 10px;">Full Technical Catalog</h2>
+        <div id="results" class="recommendation-grid"></div>
     </div>
   </div>
 </div>
 
 <script>
-// 🔬 DATA CATALOG
+// CATEGORY THUMBNAILS
+const imgMap = {
+  nova: "https://jri-mms.com/us/wp-content/uploads/sites/2/2021/04/Nova-SPY-Digital.png",
+  nano: "https://jri-mms.com/us/wp-content/uploads/sites/2/2021/04/Nano-SPY-T1.png",
+  lora: "https://jri-mms.com/us/wp-content/uploads/sites/2/2021/04/LoRa-SPY-T1.png"
+};
+
 const probes = [
-  {ref:"13912", name:"Digital Sensor T° Short (Ambient)", min:-40, max:80, acc:"±0.2°C", score:9, price: 63.00, hum:false},
-  {ref:"13993", name:"Digital Sensor T° Long (3m Flat Cable)", min:-40, max:80, acc:"±0.2°C", score:9, price: 80.00, hum:false},
-  {ref:"14129", name:"Reference Digital Sensor T° Short", min:-40, max:80, acc:"±0.15°C", score:10, price: 140.00, hum:false},
-  {ref:"13947", name:"Reference Digital Sensor T° (3m Cable)", min:-90, max:200, acc:"±0.15°C", score:10, price: 188.00, hum:false},
-  {ref:"13984", name:"Low Temp Digital Sensor (3m Cable)", min:-200, max:0, acc:"±0.5°C", score:8, price: 231.00, hum:false},
-  {ref:"12347", name:"Digital Sensor TH (Temp/Humidity)", min:-30, max:70, acc:"±0.3°C / 2%RH", score:8, price: 168.00, hum:true}
+  {ref:"13912", name:"Digital Sensor T° Short (Ambient)", min:-40, max:80, acc:"±0.2°C", price: 63.00, hum:false},
+  {ref:"13993", name:"Digital Sensor T° Long (3m Flat)", min:-40, max:80, acc:"±0.2°C", price: 80.00, hum:false},
+  {ref:"14129", name:"Reference Digital Sensor T° Short", min:-40, max:80, acc:"±0.15°C", price: 140.00, hum:false},
+  {ref:"13947", name:"Reference Digital Sensor T° (3m)", min:-90, max:200, acc:"±0.15°C", price: 188.00, hum:false},
+  {ref:"13984", name:"Low Temp Digital Sensor (3m)", min:-200, max:0, acc:"±0.5°C", price: 231.00, hum:false},
+  {ref:"12347", name:"Digital Sensor TH (Temp/Humidity)", min:-30, max:70, acc:"±0.3°C/2%RH", price: 168.00, hum:true}
 ];
 
 const baseUnits = [
-  // NANO SPY
-  {ref:"11567E", name:"Nano SPY T1 (Integrated)", tech:"nano", min:-40, max:85, hum:false, acc:"±0.4°C", score:7, price: 119.00, type:"fixed", legacy:false},
-  {ref:"11568E", name:"Nano SPY TH (Integrated)", tech:"nano", min:-30, max:70, hum:true, acc:"±0.4°C", score:7, price: 188.00, type:"fixed", legacy:false},
-  {ref:"13491", name:"Nano SPY Digital (Legacy Base)", tech:"nano", min:-200, max:200, hum:false, acc:"Modular", score:0, price: 160.00, type:"modular", legacy:true},
-  
-  // NOVA SPY
-  {ref:"13756E", name:"Nova SPY Digital (Modular Base)", tech:"nova", min:-200, max:200, hum:false, acc:"Modular", score:0, price: 166.00, type:"modular", legacy:false},
-  
-  // LORA SPY
-  {ref:"11809E", name:"LoRa SPY Digital (Modular Base)", tech:"lora", min:-200, max:200, hum:false, acc:"Modular", score:0, price: 270.00, type:"modular", legacy:false}
+  {ref:"11567E", name:"Nano SPY T1 (Integrated)", tech:"nano", min:-40, max:85, hum:false, price: 119.00, type:"fixed", legacy:false},
+  {ref:"11568E", name:"Nano SPY TH (Integrated)", tech:"nano", min:-30, max:70, hum:true, price: 188.00, type:"fixed", legacy:false},
+  {ref:"13491", name:"Nano SPY Digital (Base Unit)", tech:"nano", min:-200, max:200, hum:false, price: 160.00, type:"modular", legacy:true},
+  {ref:"13756E", name:"Nova SPY Digital (Base Unit)", tech:"nova", min:-200, max:200, hum:false, price: 166.00, type:"modular", legacy:false},
+  {ref:"11809E", name:"LoRa SPY Digital (Base Unit)", tech:"lora", min:-200, max:200, hum:false, price: 270.00, type:"modular", legacy:false}
 ];
 
 function search(){
@@ -125,17 +139,19 @@ function search(){
     if (base.type === "fixed") {
       if (base.min <= minT && base.max >= maxT && (!humReq || base.hum)) {
         matches.push({
-          name: base.name, baseRef: base.ref, tech: base.tech, min: base.min, max: base.max,
-          acc: base.acc, baseP: base.price, probeP: 0, totalP: base.price, legacy: base.legacy
+          fullName: base.name, baseRef: base.ref, tech: base.tech, 
+          min: base.min, max: base.max, acc: "±0.4°C", 
+          baseP: base.price, probeP: 0, totalP: base.price, legacy: base.legacy
         });
       }
     } else {
       probes.forEach(p => {
         if (p.min <= minT && p.max >= maxT && (!humReq || p.hum)) {
           matches.push({
-            name: `${base.name} + ${p.name}`,
-            baseRef: base.ref, probeRef: p.ref, tech: base.tech, min: p.min, max: p.max,
-            acc: p.acc, baseP: base.price, probeP: p.price, totalP: base.price + p.price, legacy: base.legacy
+            fullName: `${base.name} + ${p.name}`,
+            baseRef: base.ref, probeRef: p.ref, tech: base.tech,
+            min: p.min, max: p.max, acc: p.acc,
+            baseP: base.price, probeP: p.price, totalP: base.price + p.price, legacy: base.legacy
           });
         }
       });
@@ -147,35 +163,41 @@ function search(){
 }
 
 function render(matches) {
-  const draw = (id, list) => {
-    document.getElementById(id).innerHTML = list.map(m => `
-      <div class="card ${id==='recommendations'?'highlight':''}">
-        <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
-        ${m.legacy ? '<span class="tech-tag tag-legacy">DISCONTINUED</span>' : ''}
-        
-        <b style="color:var(--jri-blue); display:block;">${m.name}</b>
-        <div style="margin: 5px 0;">
-           <span class="ref-text">Ref: #${m.baseRef}${m.probeRef ? ' / #' + m.probeRef : ''}</span>
-        </div>
-        <div class="range-info" style="font-size:0.85rem">Range: ${m.min} to ${m.max}°C | Acc: ${m.acc}</div>
-        
-        ${m.legacy ? '<div class="legacy-warning">⚠️ Note: Base unit no longer sold. Use for existing stock only.</div>' : ''}
-
-        <div class="breakdown">
-          <div class="breakdown-row"><span>Base Unit:</span> <span>$${m.baseP.toFixed(2)}</span></div>
-          ${m.probeP > 0 ? `<div class="breakdown-row"><span>Probe:</span> <span>$${m.probeP.toFixed(2)}</span></div>` : ''}
-          <div class="breakdown-row total-row"><span>Total:</span> <span>$${m.totalP.toFixed(2)} USD</span></div>
-        </div>
+  const template = (m, isTop) => `
+    <div class="card ${isTop?'highlight':''}">
+      <div class="img-container"><img src="${imgMap[m.tech]}" alt="${m.tech}"></div>
+      <span class="tech-tag tag-${m.tech}">${m.tech} SPY</span>
+      ${m.legacy ? '<span class="tech-tag tag-legacy">Legacy Hardware</span>' : ''}
+      
+      <b style="color:var(--jri-blue); display:block; font-size:1.05rem; min-height: 2.5em;">${m.fullName}</b>
+      <div class="ref-no">Base: #${m.baseRef}${m.probeRef ? ' / Probe: #' + m.probeRef : ''}</div>
+      <div style="font-size:0.85rem; color:#555; margin-bottom:15px;">
+        <strong>Range:</strong> ${m.min} to ${m.max}°C <br> 
+        <strong>Accuracy:</strong> ${m.acc}
       </div>
-    `).join("");
-  };
-  draw("recommendations", matches.slice(0,3));
-  draw("results", matches);
+      
+      ${m.legacy ? '<div class="legacy-banner">⚠️ DISCONTINUED: Reference #13491 is no longer in production. Price shown is for legacy refresh only.</div>' : ''}
+
+      <div class="breakdown">
+        <div class="breakdown-row"><span>Sensor Base:</span> <span>$${m.baseP.toFixed(2)}</span></div>
+        ${m.probeP > 0 ? `<div class="breakdown-row"><span>Digital Probe:</span> <span>$${m.probeP.toFixed(2)}</span></div>` : ''}
+        <div class="breakdown-row total-row"><span>Estimated Total:</span> <span>$${m.totalP.toFixed(2)} USD</span></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("recommendations").innerHTML = matches.slice(0,3).map(m => template(m, true)).join("");
+  document.getElementById("results").innerHTML = matches.map(m => template(m, false)).join("");
 }
 
 function exportPDF(){
-  html2pdf().from(document.getElementById('export-area')).save("JRI_Quote.pdf");
+  const element = document.getElementById('main-display');
+  const opt = { margin: 0.5, filename: 'JRI_Technical_Selector.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+  html2pdf().set(opt).from(element).save();
 }
+
+// Initial Search
+search();
 </script>
 </body>
 </html>
