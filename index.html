@@ -4,123 +4,46 @@
   <title>JRI Smart Sensor Selector</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
-  <style>
-    body {
-      font-family: Inter, Arial;
-      background: #f4f6f8;
-      margin: 0;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
-    }
-
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    .controls {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      margin-bottom: 20px;
-    }
-
-    .row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    input[type=number] {
-      width: 90px;
-      padding: 6px;
-    }
-
-    input[type=range] {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-
-    select {
-      padding: 6px;
-      border-radius: 6px;
-      margin-top: 5px;
-    }
-
-    .card {
-      background: white;
-      padding: 15px;
-      margin-top: 10px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .highlight {
-      border-left: 5px solid #4CAF50;
-    }
-
-    button {
-      background: #4CAF50;
-      color: white;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      background: #43a047;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      margin-top: 10px;
-    }
-  </style>
+<style>
+body { font-family: Arial; background:#f4f6f8; }
+.container { max-width: 1000px; margin:auto; padding:20px; }
+.card { background:white; padding:15px; margin-top:10px; border-radius:10px; }
+.highlight { border-left:5px solid #4CAF50; }
+.controls { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
+button { background:#4CAF50; color:white; padding:10px; border:none; border-radius:8px; margin-top:10px; cursor:pointer;}
+small { color:gray; }
+</style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h2>JRI Smart Sensor Selector</h2>
 
 <div class="controls">
 
-  <label><b>Temperature Range</b></label>
+<b>Temperature Range</b><br>
+Min: <input type="number" id="minTemp" value="0" min="-200">
+Max: <input type="number" id="maxTemp" value="50" min="-200"><br><br>
 
-  <div class="row">
-    <span>Min:</span>
-    <input type="number" id="minTempInput" value="0" min="-200" max="200" step="1" oninput="syncFromInput()">
-    <span>°C</span>
-  </div>
+<b>Humidity Required</b><br>
+<select id="humidity">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
 
-  <input type="range" id="minTemp" min="-200" max="200" value="0" oninput="syncFromSlider()">
+<br><br>
 
-  <div class="row">
-    <span>Max:</span>
-    <input type="number" id="maxTempInput" value="50" min="-200" max="300" step="1" oninput="syncFromInput()">
-    <span>°C</span>
-  </div>
+<b>Application</b><br>
+<select id="application">
+<option value="general">General</option>
+<option value="pharma">Pharma</option>
+<option value="food">Food</option>
+<option value="logistics">Logistics</option>
+</select>
 
-  <input type="range" id="maxTemp" min="-200" max="300" value="50" oninput="syncFromSlider()">
-
-  <label><b>Humidity</b></label><br>
-  <select id="humidity">
-    <option value="no">Not Required</option>
-    <option value="yes">Required</option>
-  </select><br>
-
-  <button onclick="search()">Find Sensors</button>
+<br>
+<button onclick="search()">Find Sensors</button>
 
 </div>
 
@@ -130,105 +53,146 @@
 <h3>📋 All Matches</h3>
 <div id="results"></div>
 
-<h3>📝 Notes</h3>
-<textarea id="notes" rows="4" placeholder="Add customer notes here..."></textarea>
-
-<button onclick="copyText()">Copy Recommendation</button>
-<button onclick="exportPDF()">Export to PDF</button>
+<textarea id="notes" placeholder="Notes..."></textarea>
+<button onclick="exportPDF()">Export PDF</button>
 
 </div>
 
 <script>
-const products = [
-  {name:"Nano SPY TH", min:-30, max:70, humidity:true, accValue:"±0.4°C / ±4-5% RH", accScore:7},
-  {name:"Nano SPY TH High Accuracy", min:-40, max:85, humidity:true, accValue:"High accuracy probe", accScore:9},
-  {name:"Nano SPY T1", min:-40, max:85, humidity:false, accValue:"±0.4°C / ±0.5°C", accScore:7},
-  {name:"Nano SPY T2", min:-50, max:105, humidity:false, accValue:"±0.3°C / ±0.5°C", accScore:8},
-  {name:"Nano SPY T3", min:-200, max:200, humidity:false, accValue:"±0.2–0.5°C", accScore:9},
-  {name:"Nano SPY Reference", min:-196, max:150, humidity:false, accValue:"±0.15°C to ±0.6°C", accScore:10},
-  {name:"Nano SPY Universal", min:-200, max:300, humidity:true, accValue:"±0.2–0.5°C", accScore:8},
-  {name:"Nova SPY T Ambient", min:-40, max:80, humidity:false, accValue:"±0.4°C", accScore:7}
+
+// 🔬 REAL PROBE DATABASE
+const probes = [
+{
+ref:"13984",
+name:"Low Temp Sensor",
+min:-200, max:0,
+accuracy:"±0.5°C to ±0.2°C",
+accScore:8,
+humidity:false
+},
+{
+ref:"13947",
+name:"Reference Probe",
+min:-90, max:180,
+accuracy:"±0.15°C",
+accScore:10,
+humidity:false
+},
+{
+ref:"14129",
+name:"Reference Probe Short",
+min:-40, max:80,
+accuracy:"±0.15°C",
+accScore:10,
+humidity:false
+},
+{
+ref:"13993",
+name:"Temp Probe Long",
+min:-40, max:80,
+accuracy:"±0.2°C",
+accScore:9,
+humidity:false
+},
+{
+ref:"13912",
+name:"Temp Probe Short",
+min:-40, max:80,
+accuracy:"±0.2°C",
+accScore:9,
+humidity:false
+},
+{
+ref:"12347",
+name:"Temp + Humidity Probe",
+min:-30, max:70,
+accuracy:"±0.3°C / RH",
+accScore:8,
+humidity:true
+}
 ];
 
-function syncFromSlider() {
-  let min = parseFloat(document.getElementById("minTemp").value);
-  let max = parseFloat(document.getElementById("maxTemp").value);
+// 🧠 BASE PRODUCTS
+const baseProducts = [
+{name:"Nano SPY TH", min:-30, max:70, humidity:true, accuracy:"±0.4°C", accScore:7},
+{name:"Nano SPY TH High Accuracy", min:-40, max:85, humidity:true, accuracy:"High accuracy", accScore:9},
+{name:"Nano SPY T2", min:-50, max:105, humidity:false, accuracy:"±0.3°C", accScore:8},
+{name:"Nano SPY T3", min:-200, max:200, humidity:false, accuracy:"±0.2–0.5°C", accScore:9}
+];
 
-  if (min > max) min = max;
-
-  document.getElementById("minTemp").value = min;
-  document.getElementById("minTempInput").value = min;
-  document.getElementById("maxTempInput").value = max;
+// 🔧 Build Nova SPY Digital with REAL probes
+function buildDigitalProducts(){
+return probes.map(p => ({
+name:`Nova SPY Digital + ${p.name}`,
+ref:p.ref,
+min:p.min,
+max:p.max,
+humidity:p.humidity,
+accuracy:p.accuracy,
+accScore:p.accScore
+}));
 }
 
-function syncFromInput() {
-  let min = parseFloat(document.getElementById("minTempInput").value);
-  let max = parseFloat(document.getElementById("maxTempInput").value);
+function search(){
 
-  if (isNaN(min)) min = -200;
-  if (isNaN(max)) max = 300;
+const minT = parseFloat(document.getElementById("minTemp").value);
+const maxT = parseFloat(document.getElementById("maxTemp").value);
+const humidity = document.getElementById("humidity").value==="yes";
+const app = document.getElementById("application").value;
 
-  if (min > max) min = max;
+// combine all
+let products = [...baseProducts, ...buildDigitalProducts()];
 
-  document.getElementById("minTemp").value = min;
-  document.getElementById("maxTemp").value = max;
+// filter
+let matches = products.filter(p =>
+p.min<=minT && p.max>=maxT &&
+(!humidity || p.humidity)
+);
+
+// scoring logic
+matches.forEach(p=>{
+let score = p.accScore;
+
+// application weighting
+if(app==="pharma") score += p.accScore;
+if(app==="food") score -= (p.accScore > 8 ? 2 : 0);
+if(app==="logistics") score += (p.max-p.min)>150?2:0;
+
+p.score = score;
+});
+
+// sort
+matches.sort((a,b)=>b.score-a.score);
+
+// top 3
+const top = matches.slice(0,3);
+
+document.getElementById("recommendations").innerHTML =
+top.map(p=>`
+<div class="card highlight">
+<b>${p.name}</b><br>
+${p.ref ? "Ref: "+p.ref+"<br>" : ""}
+Accuracy: ${p.accuracy}
+</div>
+`).join("");
+
+// all results
+document.getElementById("results").innerHTML =
+matches.map(p=>`
+<div class="card">
+<b>${p.name}</b><br>
+${p.ref ? "Ref: "+p.ref+"<br>" : ""}
+Range: ${p.min} → ${p.max} °C<br>
+Humidity: ${p.humidity ? "Yes":"No"}<br>
+Accuracy: ${p.accuracy}
+</div>
+`).join("");
 }
 
-function search() {
-  const minT = parseFloat(document.getElementById("minTemp").value);
-  const maxT = parseFloat(document.getElementById("maxTemp").value);
-  const humidity = document.getElementById("humidity").value === "yes";
-
-  const matches = products.filter(p =>
-    p.min <= minT && p.max >= maxT &&
-    (!humidity || p.humidity)
-  );
-
-  if (matches.length === 0) {
-    document.getElementById("recommendations").innerHTML = "No matches";
-    document.getElementById("results").innerHTML = "";
-    return;
-  }
-
-  matches.forEach(p => {
-    const rangeSize = p.max - p.min;
-    p.performance = p.accScore;
-    p.value = p.accScore - (rangeSize > 200 ? 3 : rangeSize > 100 ? 2 : 0);
-    p.balanced = (p.accScore * 0.7) - (rangeSize > 150 ? 1 : 0);
-  });
-
-  const bestPerf = [...matches].sort((a,b)=>b.performance-a.performance)[0];
-  const bestValue = [...matches].sort((a,b)=>b.value-a.value)[0];
-  const bestBalanced = [...matches].sort((a,b)=>b.balanced-a.balanced)[0];
-
-  document.getElementById("recommendations").innerHTML = `
-    <div class="card highlight"><b>🏆 Best Performance</b><br>${bestPerf.name}</div>
-    <div class="card highlight"><b>💰 Best Value</b><br>${bestValue.name}</div>
-    <div class="card highlight"><b>⚖️ Balanced Choice</b><br>${bestBalanced.name}</div>
-  `;
-
-  document.getElementById("results").innerHTML =
-    matches.map(p => `
-      <div class="card">
-        <b>${p.name}</b><br>
-        Temp: ${p.min} → ${p.max} °C<br>
-        Humidity: ${p.humidity ? "Yes" : "No"}<br>
-        Accuracy: ${p.accValue}
-      </div>
-    `).join("");
+function exportPDF(){
+html2pdf().from(document.body).save("JRI_Recommendation.pdf");
 }
 
-function copyText() {
-  const text = document.getElementById("recommendations").innerText +
-               "\n\nNotes:\n" + document.getElementById("notes").value;
-  navigator.clipboard.writeText(text);
-  alert("Copied!");
-}
-
-function exportPDF() {
-  const element = document.body;
-  html2pdf().from(element).save("JRI_Recommendation.pdf");
-}
 </script>
 
 </body>
