@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI MySirius System Builder v2.4</title>
+  <title>JRI MySirius System Builder v2.5</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; --legacy: #d32f2f; }
@@ -33,54 +33,63 @@
     input, select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; }
     button { width: 100%; background: var(--jri-blue); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     
-    .unit-toggle { display: flex; gap: 10px; margin-bottom: 15px; }
-    .unit-toggle label { flex: 1; text-align: center; padding: 10px; background: #eee; border-radius: 8px; cursor: pointer; font-weight: bold; }
-    .unit-toggle input { display: none; }
-    .unit-toggle input:checked + label { background: var(--jri-blue); color: white; }
+    .toggle-group { display: flex; gap: 10px; margin-bottom: 15px; }
+    .toggle-group label { flex: 1; text-align: center; padding: 10px; background: #eee; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: 0.2s; }
+    .toggle-group input { display: none; }
+    .toggle-group input:checked + label { background: var(--jri-blue); color: white; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <header style="margin-bottom: 30px; border-bottom: 4px solid var(--jri-blue); padding-bottom: 10px;">
-    <h1 style="color: var(--jri-blue); margin:0;">JRI MySirius System Builder</h1>
-    <p style="color: #666; margin: 5px 0 0 0;">v2.4 | Multi-Unit Conversion (F°/C°) & Compatibility Logic</p>
+  <header style="margin-bottom: 30px; border-bottom: 4px solid var(--jri-blue); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: baseline;">
+    <div>
+      <h1 id="mainTitle" style="color: var(--jri-blue); margin:0;">JRI MySirius System Builder</h1>
+      <p id="subTitle" style="color: #666; margin: 5px 0 0 0;">v2.5 | Multi-Unit & Multilingual Support</p>
+    </div>
   </header>
 
   <div class="dashboard">
     <div class="controls">
-      <h3>Global Settings</h3>
-      <label>Measurement Unit</label>
-      <div class="unit-toggle">
+      <h3 data-key="langSelect">Language / Idioma</h3>
+      <div class="toggle-group">
+        <input type="radio" id="langEN" name="lang" value="en" checked onchange="search()">
+        <label for="langEN">English</label>
+        <input type="radio" id="langES" name="lang" value="es" onchange="search()">
+        <label for="langES">Español</label>
+      </div>
+
+      <h3 data-key="unitSelect">Units / Unidades</h3>
+      <div class="toggle-group">
         <input type="radio" id="unitC" name="unit" value="C" checked onchange="search()">
         <label for="unitC">Celsius (°C)</label>
         <input type="radio" id="unitF" name="unit" value="F" onchange="search()">
         <label for="unitF">Fahrenheit (°F)</label>
       </div>
 
-      <h3>Environmental Specs</h3>
-      <label id="tempLabel">Range</label>
+      <h3 data-key="envSpecs">Environmental Specs</h3>
+      <label id="rangeLabel" data-key="rangeLabel">Range</label>
       <div style="display:flex; gap:10px;">
         <input type="number" id="minTemp" value="2" step="0.1">
         <input type="number" id="maxTemp" value="8" step="0.1">
       </div>
 
-      <label>Humidity Required?</label>
+      <label data-key="humLabel">Humidity Required?</label>
       <select id="humidity" onchange="search()">
-        <option value="no">No</option>
-        <option value="yes">Yes</option>
+        <option value="no" data-key="no">No</option>
+        <option value="yes" data-key="yes">Yes</option>
       </select>
 
-      <label>Network</label>
+      <label data-key="techLabel">Network</label>
       <select id="tech" onchange="search()">
-        <option value="any">Compare All</option>
+        <option value="any" data-key="any">Compare All</option>
         <option value="nova">Nova SPY</option>
         <option value="nano">Nano SPY</option>
         <option value="lora">LoRa SPY</option>
       </select>
 
-      <button onclick="search()">Filter Catalog</button>
-      <button style="margin-top:10px; background:#4a5568;" onclick="exportPDF()">Export PDF Quote</button>
+      <button id="btnFilter" onclick="search()" data-key="btnFilter">Filter Catalog</button>
+      <button id="btnExport" style="margin-top:10px; background:#4a5568;" onclick="exportPDF()" data-key="btnExport">Export PDF Quote</button>
     </div>
 
     <div id="main-display">
@@ -90,10 +99,64 @@
 </div>
 
 <script>
-// Logic-based conversions
+// Translation Dictionary
+const i18n = {
+    en: {
+        mainTitle: "JRI MySirius System Builder",
+        subTitle: "v2.5 | Multi-Unit & Multilingual Support",
+        langSelect: "Language",
+        unitSelect: "Measurement Unit",
+        envSpecs: "Environmental Specs",
+        rangeLabel: "Temperature Range",
+        humLabel: "Humidity Required?",
+        techLabel: "Network Technology",
+        no: "No",
+        yes: "Yes",
+        any: "Compare All",
+        btnFilter: "Filter Catalog",
+        btnExport: "Export PDF Quote",
+        recorder: "Recorder",
+        probe: "Probe",
+        legacyTag: "LEGACY",
+        legacyWarn: "⚠️ Note: Nano SPY Digital (#13491) is no longer sold. Use for existing hardware support only.",
+        rangeInfo: "Measurement Range:",
+        accInfo: "Accuracy:",
+        basePrice: "Recorder Base:",
+        probePrice: "Digital Probe:",
+        totalSystem: "Total System:",
+        currency: "USD"
+    },
+    es: {
+        mainTitle: "Constructor de Sistemas JRI",
+        subTitle: "v2.5 | Soporte Multilingüe y Unidades",
+        langSelect: "Idioma",
+        unitSelect: "Unidad de Medida",
+        envSpecs: "Especificaciones Ambientales",
+        rangeLabel: "Rango de Temperatura",
+        humLabel: "¿Requiere Humedad?",
+        techLabel: "Tecnología de Red",
+        no: "No",
+        yes: "Sí",
+        any: "Comparar Todos",
+        btnFilter: "Filtrar Catálogo",
+        btnExport: "Exportar PDF",
+        recorder: "Registrador",
+        probe: "Sonda",
+        legacyTag: "LEGADO",
+        legacyWarn: "⚠️ Nota: Nano SPY Digital (#13491) ya no se vende. Usar solo para soporte de hardware existente.",
+        rangeInfo: "Rango de Medición:",
+        accInfo: "Precisión:",
+        basePrice: "Base del Registrador:",
+        probePrice: "Sonda Digital:",
+        totalSystem: "Sistema Total:",
+        currency: "USD"
+    }
+};
+
+// Math Logic
 const cToF = (c) => (c * 9/5) + 32;
 const fToC = (f) => (f - 32) * 5/9;
-const accToF = (cOffset) => (cOffset * 9/5); // For relative accuracy offsets
+const accToF = (cOffset) => (cOffset * 9/5);
 
 const probes = [
   {ref:"12347", name:"Digital TH Sensor", min:-30, max:70, acc:0.3, price: 168, hum:true, img:"12347 Green Digital Temperature and Humidity Sensor.png"},
@@ -102,25 +165,32 @@ const probes = [
   {ref:"13912", name:"Digital Sensor T Short", min:-40, max:80, acc:0.2, price: 63, hum:false, img:"13912 Green Digital Sensor Temperature (short version).png"},
   {ref:"13947", name:"Digital Sensor Reference", min:-90, max:200, acc:0.15, price: 188, hum:false, img:"13947 Green Digital Sensor Reference.png", novaOnly: true},
   {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:0.5, price: 231, hum:false, img:"13984 Green Digital Low Temperature Sensor.png"},
-  {ref:"13993", name:"Digital Sensor T Long", min:-40, max:80, acc:0.2, price: 80, hum:false, img:"13993 Green Digital Sensor Temperature (long version).png"},
-  {ref:"13264", name:"PT100 Industrial High-Temp", min:-50, max:200, acc:"Class A", price: 132, hum:false, img:"13264 PT100 high-temperature sensor for industrial.png"},
-  {ref:"13572", name:"Autoclave PT100 Probe", min:0, max:140, acc:"Class A", price: 195, hum:false, img:"13572 Autoclaves PT100 probe Ø4-130mm.png"}
+  {ref:"13993", name:"Digital Sensor T Long", min:-40, max:80, acc:0.2, price: 80, hum:false, img:"13993 Green Digital Sensor Temperature (long version).png"}
 ];
 
 const baseUnits = [
   {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", modular: true},
   {ref:"13491", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", modular: true, legacy: true},
   {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", modular: true},
-  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", modular: false, min:-40, max:85, acc:0.4, hum:false},
-  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 253, img:"LoRa SPY TH.png", modular: false, min:-30, max:70, acc:0.4, hum:true}
+  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", modular: false, min:-40, max:85, acc:0.4, hum:false}
 ];
 
+function updateUIStrings(lang) {
+    document.getElementById("mainTitle").innerText = i18n[lang].mainTitle;
+    document.getElementById("subTitle").innerText = i18n[lang].subTitle;
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (i18n[lang][key]) el.innerText = i18n[lang][key];
+    });
+}
+
 function search(){
+  const lang = document.querySelector('input[name="lang"]:checked').value;
   const unit = document.querySelector('input[name="unit"]:checked').value;
+  updateUIStrings(lang);
+
   let minInput = parseFloat(document.getElementById("minTemp").value);
   let maxInput = parseFloat(document.getElementById("maxTemp").value);
-  
-  // Convert inputs to Celsius for catalog filtering if needed
   const filterMin = (unit === "F") ? fToC(minInput) : minInput;
   const filterMax = (unit === "F") ? fToC(maxInput) : maxInput;
 
@@ -128,77 +198,56 @@ function search(){
   const techPref = document.getElementById("tech").value;
 
   let matches = [];
-
   baseUnits.forEach(base => {
     if (techPref !== "any" && base.tech !== techPref) return;
-
     if (!base.modular) {
       if (base.min <= filterMin && base.max >= filterMax && (!humReq || base.hum)) {
-        matches.push({
-          fullName: base.name, tech: base.tech, baseRef: base.ref,
-          baseP: base.price, totalP: base.price, baseImg: base.img, 
-          min: base.min, max: base.max, acc: base.acc, legacy: false
-        });
+        matches.push({ fullName: base.name, tech: base.tech, baseRef: base.ref, baseP: base.price, totalP: base.price, baseImg: base.img, min: base.min, max: base.max, acc: base.acc, legacy: false });
       }
     } else {
       probes.forEach(p => {
         if (p.novaOnly && base.tech !== 'nova') return;
         if (p.min <= filterMin && p.max >= filterMax && (!humReq || p.hum)) {
-          matches.push({
-            fullName: `${base.name} + ${p.name}`,
-            tech: base.tech, baseRef: base.ref, probeRef: p.ref,
-            baseP: base.price, probeP: p.price, totalP: base.price + p.price,
-            baseImg: base.img, probeImg: p.img,
-            min: p.min, max: p.max, acc: p.acc, legacy: base.legacy
-          });
+          matches.push({ fullName: `${base.name} + ${p.name}`, tech: base.tech, baseRef: base.ref, probeRef: p.ref, baseP: base.price, probeP: p.price, totalP: base.price + p.price, baseImg: base.img, probeImg: p.img, min: p.min, max: p.max, acc: p.acc, legacy: base.legacy });
         }
       });
     }
   });
 
-  render(matches, unit);
+  render(matches, unit, lang);
 }
 
-function render(matches, unit) {
+function render(matches, unit, lang) {
+  const t = i18n[lang];
   document.getElementById("results").innerHTML = matches.map(m => {
-    // Format Tech Specs based on unit
-    let displayRange, displayAcc;
-    if(unit === "F") {
-        displayRange = `${cToF(m.min).toFixed(1)} to ${cToF(m.max).toFixed(1)}°F`;
-        displayAcc = (typeof m.acc === 'number') ? `±${accToF(m.acc).toFixed(2)}°F` : m.acc;
-    } else {
-        displayRange = `${m.min} to ${m.max}°C`;
-        displayAcc = (typeof m.acc === 'number') ? `±${m.acc}°C` : m.acc;
-    }
+    let dRange = (unit === "F") ? `${cToF(m.min).toFixed(1)} to ${cToF(m.max).toFixed(1)}°F` : `${m.min} to ${m.max}°C`;
+    let dAcc = (typeof m.acc === 'number') ? (unit === "F" ? `±${accToF(m.acc).toFixed(2)}°F` : `±${m.acc}°C`) : m.acc;
 
     return `
     <div class="card">
       <div class="visual-header">
-        <div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">Recorder</span></div>
-        ${m.probeImg ? `<div style="font-size:20px; color:#ccc;">+</div><div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">Probe</span></div>` : ''}
+        <div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">${t.recorder}</span></div>
+        ${m.probeImg ? `<div style="font-size:20px; color:#ccc;">+</div><div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">${t.probe}</span></div>` : ''}
       </div>
       <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
-      ${m.legacy ? '<span class="tech-tag tag-legacy">LEGACY</span>' : ''}
-      
+      ${m.legacy ? `<span class="tech-tag tag-legacy">${t.legacyTag}</span>` : ''}
       <b style="display:block; font-size:1rem; margin-bottom:5px;">${m.fullName}</b>
       <div style="font-size:0.8rem; color:#666; margin-bottom:10px;">Ref: #${m.baseRef}${m.probeRef ? ' + #' + m.probeRef : ''}</div>
-      
-      ${m.legacy ? '<div class="legacy-banner">⚠️ Note: Nano SPY Digital (#13491) is no longer sold. Use for existing hardware support only.</div>' : ''}
-
+      ${m.legacy ? `<div class="legacy-banner">${t.legacyWarn}</div>` : ''}
       <div class="breakdown">
-        <div><b>Measurement Range:</b> ${displayRange}</div>
-        <div><b>Accuracy:</b> ${displayAcc}</div>
+        <div><b>${t.rangeInfo}</b> ${dRange}</div>
+        <div><b>${t.accInfo}</b> ${dAcc}</div>
         <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
-        <div style="display:flex; justify-content:space-between;"><span>Recorder Base:</span> <span>$${m.baseP.toFixed(2)}</span></div>
-        ${m.probeP ? `<div style="display:flex; justify-content:space-between;"><span>Digital Probe:</span> <span>$${m.probeP.toFixed(2)}</span></div>` : ''}
-        <div class="total-row" style="display:flex; justify-content:space-between;"><span>Total System:</span> <span>$${m.totalP.toFixed(2)} USD</span></div>
+        <div style="display:flex; justify-content:space-between;"><span>${t.basePrice}</span> <span>$${m.baseP.toFixed(2)}</span></div>
+        ${m.probeP ? `<div style="display:flex; justify-content:space-between;"><span>${t.probePrice}</span> <span>$${m.probeP.toFixed(2)}</span></div>` : ''}
+        <div class="total-row" style="display:flex; justify-content:space-between;"><span>${t.totalSystem}</span> <span>$${m.totalP.toFixed(2)} ${t.currency}</span></div>
       </div>
-    </div>
-  `}).join("");
+    </div>`;
+  }).join("");
 }
 
 function exportPDF(){
-  html2pdf().from(document.getElementById('results')).save("JRI_Technical_Quote.pdf");
+  html2pdf().from(document.getElementById('results')).save("JRI_Quote.pdf");
 }
 search();
 </script>
