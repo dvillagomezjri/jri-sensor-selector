@@ -3,51 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI MySirius System Builder v2.2</title>
+  <title>JRI MySirius System Builder v2.3</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
-    :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
-    .container { max-width: 1500px; margin: auto; padding: 20px; }
+    :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; --legacy: #d32f2f; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
+    .container { max-width: 1550px; margin: auto; padding: 20px; }
     .dashboard { display: grid; grid-template-columns: 380px 1fr; gap: 25px; }
     .controls, .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
     
-    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; }
+    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
     .card { border: 1px solid #eee; display: flex; flex-direction: column; transition: 0.2s; position: relative; }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
     
-    /* Visual Header */
     .visual-header { display: flex; align-items: center; justify-content: center; gap: 10px; height: 160px; margin-bottom: 15px; background: white; padding: 10px; border-radius: 8px; border-bottom: 1px solid #f0f0f0; }
     .img-wrap { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
     .img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
-    .img-label { position: absolute; bottom: -5px; font-size: 0.65rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-    .plus-sign { font-size: 24px; color: #ccc; font-weight: bold; }
+    .img-label { position: absolute; bottom: -5px; font-size: 0.65rem; color: #aaa; text-transform: uppercase; }
 
     .tech-tag { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: white; margin-bottom: 10px; }
     .tag-nova { background: var(--nova); } .tag-nano { background: var(--nano); } .tag-lora { background: var(--lora); }
-    
-    .breakdown { background: #f9fafb; padding: 12px; border-radius: 8px; margin-top: auto; border: 1px solid #edf2f7; font-size: 0.9rem; }
-    .total-row { border-top: 2px solid var(--jri-blue); padding-top: 8px; margin-top: 5px; font-weight: bold; color: var(--jri-blue); font-size: 1.15rem; }
+    .tag-legacy { background: var(--legacy); }
+
+    .legacy-banner { background: #ffebee; color: var(--legacy); font-size: 0.75rem; padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #ffcdd2; font-weight: bold; }
+
+    .breakdown { background: #f9fafb; padding: 12px; border-radius: 8px; margin-top: auto; border: 1px solid #edf2f7; font-size: 0.85rem; }
+    .breakdown b { color: var(--jri-blue); }
+    .total-row { border-top: 2px solid var(--jri-blue); padding-top: 8px; margin-top: 5px; font-weight: bold; color: var(--jri-blue); font-size: 1.1rem; }
     
     input, select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; }
-    button { width: 100%; background: var(--jri-blue); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    button { width: 100%; background: var(--jri-blue); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <header style="margin-bottom: 30px; border-bottom: 4px solid var(--jri-blue); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-end;">
-    <div>
-      <h1 style="color: var(--jri-blue); margin:0; font-size: 2.2rem;">JRI MySirius System Builder</h1>
-      <p style="color: #666; margin: 5px 0 0 0;">v2.2 | Full Hardware & Image Integration</p>
-    </div>
-    <div style="font-weight: bold; color: var(--jri-blue);">INTERNAL SALES TOOL</div>
+  <header style="margin-bottom: 30px; border-bottom: 4px solid var(--jri-blue); padding-bottom: 10px;">
+    <h1 style="color: var(--jri-blue); margin:0;">JRI MySirius System Builder</h1>
+    <p style="color: #666; margin: 5px 0 0 0;">v2.3 | Advanced Compatibility & Technical Specs</p>
   </header>
 
   <div class="dashboard">
     <div class="controls">
-      <h3>Environment Specs</h3>
-      <label>Operating Temp Range (°C)</label>
+      <h3>Search Filters</h3>
+      <label>Operating Range (°C)</label>
       <div style="display:flex; gap:10px;">
         <input type="number" id="minTemp" value="2">
         <input type="number" id="maxTemp" value="8">
@@ -55,20 +53,20 @@
 
       <label>Humidity Required?</label>
       <select id="humidity">
-        <option value="no">No (Temp Only)</option>
-        <option value="yes">Yes (Temp + Humidity)</option>
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
       </select>
 
-      <label>Network Technology</label>
+      <label>Network</label>
       <select id="tech">
-        <option value="any">Compare All Networks</option>
-        <option value="nova">Nova SPY (2.4GHz Industrial)</option>
-        <option value="nano">Nano SPY (2.4GHz Compact)</option>
-        <option value="lora">LoRa SPY (868MHz Long Range)</option>
+        <option value="any">Compare All</option>
+        <option value="nova">Nova SPY</option>
+        <option value="nano">Nano SPY</option>
+        <option value="lora">LoRa SPY</option>
       </select>
 
       <button onclick="search()">Filter Catalog</button>
-      <button style="margin-top:10px; background:#4a5568;" onclick="exportPDF()">Export Technical Proposal</button>
+      <button style="margin-top:10px; background:#4a5568;" onclick="exportPDF()">Export PDF Quote</button>
     </div>
 
     <div id="main-display">
@@ -78,37 +76,24 @@
 </div>
 
 <script>
-// Catalog with your uploaded filenames
 const probes = [
-  {ref:"12347", name:"Digital TH Sensor", min:-30, max:70, price: 168.00, hum:true, img:"12347 Green Digital Temperature and Humidity Sensor.png"},
-  {ref:"14129", name:"Digital Sensor Ref Short", min:-40, max:80, price: 140.00, hum:false, img:"14129 Green Digital Sensor Reference Short.png"},
-  {ref:"14229", name:"Digital Sensor Standard", min:-40, max:80, price: 120.00, hum:false, img:"14229 Green Digital Sensor Standard.png"},
-  {ref:"13912", name:"Digital Sensor T Short", min:-40, max:80, price: 63.00, hum:false, img:"13912 Green Digital Sensor Temperature (short version).png"},
-  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:200, price: 188.00, hum:false, img:"13947 Green Digital Sensor Reference.png"},
-  {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, price: 231.00, hum:false, img:"13984 Green Digital Low Temperature Sensor.png"},
-  {ref:"13993", name:"Digital Sensor T Long", min:-40, max:80, price: 80.00, hum:false, img:"13993 Green Digital Sensor Temperature (long version).png"},
-  {ref:"06154", name:"PT100 High-Temp (Spring)", min:0, max:250, price: 145.00, hum:false, img:"06154 PT100 high-temperature sensor with bending spring.png"},
-  {ref:"13264", name:"PT100 Industrial High-Temp", min:-50, max:200, price: 132.00, hum:false, img:"13264 PT100 high-temperature sensor for industrial.png"},
-  {ref:"13572", name:"Autoclave PT100 Probe", min:0, max:140, price: 195.00, hum:false, img:"13572 Autoclaves PT100 probe Ø4-130mm.png"}
+  {ref:"12347", name:"Digital TH Sensor", min:-30, max:70, acc:"±0.3°C / 2%RH", price: 168, hum:true, img:"12347 Green Digital Temperature and Humidity Sensor.png"},
+  {ref:"14129", name:"Digital Sensor Ref Short", min:-40, max:80, acc:"±0.15°C", price: 140, hum:false, img:"14129 Green Digital Sensor Reference Short.png"},
+  {ref:"14229", name:"Digital Sensor Standard", min:-40, max:80, acc:"±0.4°C", price: 120, hum:false, img:"14229 Green Digital Sensor Standard.png"},
+  {ref:"13912", name:"Digital Sensor T Short", min:-40, max:80, acc:"±0.2°C", price: 63, hum:false, img:"13912 Green Digital Sensor Temperature (short version).png"},
+  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:200, acc:"±0.15°C", price: 188, hum:false, img:"13947 Green Digital Sensor Reference.png", novaOnly: true},
+  {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:"±0.5°C", price: 231, hum:false, img:"13984 Green Digital Low Temperature Sensor.png"},
+  {ref:"13993", name:"Digital Sensor T Long", min:-40, max:80, acc:"±0.2°C", price: 80, hum:false, img:"13993 Green Digital Sensor Temperature (long version).png"},
+  {ref:"13264", name:"PT100 Industrial High-Temp", min:-50, max:200, acc:"Class A", price: 132, hum:false, img:"13264 PT100 high-temperature sensor for industrial.png"},
+  {ref:"13572", name:"Autoclave PT100 Probe", min:0, max:140, acc:"Class A", price: 195, hum:false, img:"13572 Autoclaves PT100 probe Ø4-130mm.png"}
 ];
 
 const baseUnits = [
-  // NOVA
-  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166.0, img:"Nova SPY Digital.png", modular: true},
-  {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154.0, img:"Nova SPY T Ambient.png", modular: false, min:-40, max:80, hum:false},
-  
-  // NANO
-  {ref:"11572E", name:"Nano SPY Digital", tech:"nano", price: 156.0, img:"Nano SPY Digital.png", modular: true},
-  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119.0, img:"Nano SPY T1.png", modular: false, min:-40, max:85, hum:false},
-  {ref:"11569E", name:"Nano SPY T2", tech:"nano", price: 217.0, img:"Nano SPY T2.png", modular: false, min:-50, max:105, hum:false},
-  {ref:"11568E", name:"Nano SPY TH", tech:"nano", price: 188.0, img:"Nano SPY TH.png", modular: false, min:-30, max:70, hum:true},
-  {ref:"11571E", name:"Nano SPY U", tech:"nano", price: 245.0, img:"Nano SPY U.png", modular: false, min:-200, max:200, hum:false},
-
-  // LORA
-  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270.0, img:"LoRa SPY Digital.png", modular: true},
-  {ref:"11801E", name:"LoRa SPY T0", tech:"lora", price: 221.0, img:"LoRa SPY T0.png", modular: false, min:-40, max:85, hum:false},
-  {ref:"11802E", name:"LoRa SPY T1", tech:"lora", price: 242.0, img:"LoRa SPY T1.png", modular: false, min:-30, max:70, hum:false},
-  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 253.0, img:"LoRa SPY TH.png", modular: false, min:-30, max:70, hum:true}
+  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", modular: true},
+  {ref:"13491", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", modular: true, legacy: true},
+  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", modular: true},
+  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", modular: false, min:-40, max:85, acc:"±0.4°C", hum:false},
+  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 253, img:"LoRa SPY TH.png", modular: false, min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true}
 ];
 
 function search(){
@@ -126,18 +111,22 @@ function search(){
       if (base.min <= minT && base.max >= maxT && (!humReq || base.hum)) {
         matches.push({
           fullName: base.name, tech: base.tech, baseRef: base.ref,
-          baseP: base.price, probeP: 0, totalP: base.price,
-          baseImg: base.img, probeImg: null
+          baseP: base.price, totalP: base.price, baseImg: base.img, 
+          range: `${base.min} to ${base.max}°C`, accuracy: base.acc, legacy: false
         });
       }
     } else {
       probes.forEach(p => {
+        // Compatibility Rule: Ref 13947 only with Nova
+        if (p.novaOnly && base.tech !== 'nova') return;
+
         if (p.min <= minT && p.max >= maxT && (!humReq || p.hum)) {
           matches.push({
             fullName: `${base.name} + ${p.name}`,
             tech: base.tech, baseRef: base.ref, probeRef: p.ref,
             baseP: base.price, probeP: p.price, totalP: base.price + p.price,
-            baseImg: base.img, probeImg: p.img
+            baseImg: base.img, probeImg: p.img,
+            range: `${p.min} to ${p.max}°C`, accuracy: p.acc, legacy: base.legacy
           });
         }
       });
@@ -151,34 +140,33 @@ function render(matches) {
   document.getElementById("results").innerHTML = matches.map(m => `
     <div class="card">
       <div class="visual-header">
-        <div class="img-wrap">
-          <img src="${m.baseImg}" onerror="this.src='https://placehold.co/120?text=Recorder'">
-          <span class="img-label">Recorder</span>
-        </div>
-        ${m.probeImg ? `
-          <div class="plus-sign">+</div>
-          <div class="img-wrap">
-            <img src="${m.probeImg}" onerror="this.src='https://placehold.co/120?text=Probe'">
-            <span class="img-label">Probe</span>
-          </div>` : ''}
+        <div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">Recorder</span></div>
+        ${m.probeImg ? `<div style="font-size:20px; color:#ccc;">+</div><div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">Probe</span></div>` : ''}
       </div>
-      <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()} SPY</span>
-      <b style="display:block; font-size:1.05rem; margin-bottom:5px; min-height: 2.4em;">${m.fullName}</b>
-      <div style="font-size:0.85rem; color:#666; margin-bottom:12px;">Ref: #${m.baseRef}${m.probeRef ? ' + #' + m.probeRef : ''}</div>
+      <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
+      ${m.legacy ? '<span class="tech-tag tag-legacy">LEGACY</span>' : ''}
+      
+      <b style="display:block; font-size:1rem; margin-bottom:5px;">${m.fullName}</b>
+      <div style="font-size:0.8rem; color:#666; margin-bottom:10px;">Ref: #${m.baseRef}${m.probeRef ? ' + #' + m.probeRef : ''}</div>
+      
+      ${m.legacy ? '<div class="legacy-banner">⚠️ Note: Nano SPY Digital (#13491) is no longer sold. Use for existing hardware support only.</div>' : ''}
+
       <div class="breakdown">
-        <div style="display:flex; justify-content:space-between;"><span>Hardware Base:</span> <span>$${m.baseP.toFixed(2)}</span></div>
-        ${m.probeP > 0 ? `<div style="display:flex; justify-content:space-between;"><span>Digital Probe:</span> <span>$${m.probeP.toFixed(2)}</span></div>` : ''}
-        <div class="total-row" style="display:flex; justify-content:space-between;"><span>Estimated System:</span> <span>$${m.totalP.toFixed(2)} USD</span></div>
+        <div><b>Measurement Range:</b> ${m.range}</div>
+        <div><b>Accuracy:</b> ${m.accuracy}</div>
+        <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
+        <div style="display:flex; justify-content:space-between;"><span>Recorder Base:</span> <span>$${m.baseP.toFixed(2)}</span></div>
+        ${m.probeP ? `<div style="display:flex; justify-content:space-between;"><span>Digital Probe:</span> <span>$${m.probeP.toFixed(2)}</span></div>` : ''}
+        <div class="total-row" style="display:flex; justify-content:space-between;"><span>Total System:</span> <span>$${m.totalP.toFixed(2)} USD</span></div>
       </div>
     </div>
   `).join("");
 }
 
 function exportPDF(){
-  html2pdf().from(document.getElementById('main-display')).save("JRI_Project_Quote.pdf");
+  html2pdf().from(document.getElementById('results')).save("JRI_Technical_Quote.pdf");
 }
-
-search(); 
+search();
 </script>
 </body>
 </html>
