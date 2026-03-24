@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Sensor Recommendation v2.14</title>
+  <title>JRI Sensor Recommendation v2.15</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; --legacy: #d32f2f; }
@@ -42,7 +42,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo" onerror="this.style.display='none'">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.6rem;">JRI Sensor Recommendation</h1>
-      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.14 | Full Integrated Range Update</p>
+      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.15 | Enhanced Recommendation Sections</p>
     </div>
   </header>
   <div class="dashboard">
@@ -52,10 +52,10 @@
         <input type="radio" id="langES" name="lang" value="es" onchange="search()"><label for="langES">ES</label>
       </div>
       <div class="toggle-group">
-        <input type="radio" id="unitC" name="unit" value="C" checked onchange="search()"><label for="unitC">°Celsius</label>
-        <input type="radio" id="unitF" name="unit" value="F" onchange="search()"><label for="unitF">°Fahrenheit</label>
+        <input type="radio" id="unitC" name="unit" value="C" checked onchange="search()"><label for="unitC">°C</label>
+        <input type="radio" id="unitF" name="unit" value="F" onchange="search()"><label for="unitF">°F</label>
       </div>
-      <h3 style="font-size: 1rem; margin-bottom: 10px;">Environmental Specs</h3>
+      <h3 style="font-size: 1rem; margin-bottom: 10px;">Specs</h3>
       <label style="font-size: 0.9rem;">Temperature Range</label>
       <div style="display:flex; gap:10px; margin-bottom: 0;">
         <div style="flex:1;"><input type="number" id="minTemp" value="2" onchange="search()"><small class="sub-label">Low</small></div>
@@ -88,68 +88,55 @@
 </div>
 <script>
 const i18n = {
-    en: { recorder: "Recorder", probe: "Probe", rangeInfo: "Range:", accInfo: "Accuracy:", basePrice: "Recorder:", total: "Total:", totalSystem: "Total System:" },
-    es: { recorder: "Registrador", probe: "Sonda", rangeInfo: "Rango:", accInfo: "Precisión:", basePrice: "Registrador:", total: "Total:", totalSystem: "Total del Sistema:" }
+    en: { recorder: "Recorder", probe: "Probe", rangeInfo: "Range:", accInfo: "Accuracy:", totalSystem: "Total System:" },
+    es: { recorder: "Registrador", probe: "Sonda", rangeInfo: "Rango:", accInfo: "Precisión:", totalSystem: "Sistema Total:" }
 };
 const cToF = (c) => (c * 9/5) + 32;
 const fToC = (f) => (f - 32) * 5/9;
 const accToF = (cOffset) => (cOffset * 9/5);
 
-// FULL HARDWARE DATABASE
 const baseUnits = [
-  // NOVA
-  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", baseScore: 10},
-  {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, baseScore: 9},
-  
-  // NANO
-  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, baseScore: 9},
+  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", baseScore: 5},
+  {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, baseScore: 10},
+  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, baseScore: 10},
   {ref:"11569E", name:"Nano SPY T2", tech:"nano", price: 217, img:"Nano SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.3°C", hum:false, baseScore: 8},
-  {ref:"11568E", name:"Nano SPY TH", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, baseScore: 8},
-  {ref:"11571E", name:"Nano SPY U", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", baseScore: 7},
-  
-  // LORA
-  {ref:"11800E", name:"LoRa SPY T0", tech:"lora", price: 230, img:"LoRa SPY T0.png", input:"fixed", min:-30, max:70, acc:"±0.5°C", hum:false, baseScore: 7},
-  {ref:"11802E", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, baseScore: 8},
-  {ref:"11804E", name:"LoRa SPY T2", tech:"lora", price: 420, img:"LoRa SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.3°C", hum:false, baseScore: 7},
-  {ref:"11806E", name:"LoRa SPY T3", tech:"lora", price: 518, img:"LoRa SPY T3.png", input:"fixed", min:-200, max:0, acc:"±0.2°C", hum:false, baseScore: 8},
-  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, baseScore: 8},
-  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", baseScore: 8},
-  {ref:"11810E", name:"LoRa SPY U", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", baseScore: 7}
+  {ref:"11568E", name:"Nano SPY TH", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, baseScore: 10},
+  {ref:"11571E", name:"Nano SPY U", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", baseScore: 5},
+  {ref:"11800E", name:"LoRa SPY T0", tech:"lora", price: 230, img:"LoRa SPY T0.png", input:"fixed", min:-30, max:70, acc:"±0.5°C", hum:false, baseScore: 8},
+  {ref:"11802E", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, baseScore: 10},
+  {ref:"11804E", name:"LoRa SPY T2", tech:"lora", price: 420, img:"LoRa SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.3°C", hum:false, baseScore: 8},
+  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, baseScore: 10},
+  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", baseScore: 5},
+  {ref:"11810E", name:"LoRa SPY U", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", baseScore: 5}
 ];
 
 const probes = [
   {ref:"12347", name:"Digital TH Sensor", min:-30, max:70, acc:0.3, price: 168, hum:true, img:"12347 Green Digital Temperature and Humidity Sensor.png", type:"digital", accRank: 7},
   {ref:"14129", name:"Digital Sensor Ref Short", min:-40, max:80, acc:0.15, price: 140, hum:false, img:"14129 Green Digital Sensor Reference Short.png", type:"digital", accRank: 10},
-  {ref:"14229", name:"Digital Sensor Standard", min:-40, max:80, acc:"±0.1°C to ±0.5°C", price: 120, hum:false, img:"14229 Green Digital Sensor Standard.png", type:"digital", accRank: 6},
-  {ref:"13912", name:"Digital Sensor T Short", min:-40, max:80, acc:0.2, price: 63, hum:false, img:"13912 Green Digital Sensor Temperature (short version).png", type:"digital", accRank: 8},
-  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:0.15, price: 188, hum:false, img:"13947 Green Digital Sensor Reference.png", type:"digital", novaOnly: true, accRank: 10},
-  {ref:"13264", name:"PT100 Industrial High-Temp", min:-50, max:700, acc:"Class A", price: 132, hum:false, img:"13264 PT100 high-temperature sensor for industrial.png", type:"analog", accRank: 6}
+  {ref:"13912", name:"Digital Sensor T Short", min:-40, max:80, acc:0.2, price: 63, hum:false, img:"13912 Green Digital Sensor Temperature (short version).png", type:"digital", accRank: 8}
 ];
 
 function search(){
   const lang = document.querySelector('input[name="lang"]:checked').value;
   const unit = document.querySelector('input[name="unit"]:checked').value;
   const sort = document.getElementById("sortOrder").value;
-  const minI = parseFloat(document.getElementById("minTemp").value);
-  const maxI = parseFloat(document.getElementById("maxTemp").value);
-  const fMin = (unit === "F") ? fToC(minI) : minI;
-  const fMax = (unit === "F") ? fToC(maxI) : maxI;
+  const fMin = (unit === "F") ? fToC(parseFloat(document.getElementById("minTemp").value)) : parseFloat(document.getElementById("minTemp").value);
+  const fMax = (unit === "F") ? fToC(parseFloat(document.getElementById("maxTemp").value)) : parseFloat(document.getElementById("maxTemp").value);
   const humReq = document.getElementById("humidity").value === "yes";
-  const selectedTechs = Array.from(document.querySelectorAll('input[name="tech"]:checked')).map(cb => cb.value);
+  const sTechs = Array.from(document.querySelectorAll('input[name="tech"]:checked')).map(cb => cb.value);
 
   let matches = [];
   baseUnits.forEach(base => {
-    if (!selectedTechs.includes(base.tech)) return;
+    if (!sTechs.includes(base.tech)) return;
     if (base.input === "fixed") {
       if (base.min <= fMax && base.max >= fMin && (!humReq || base.hum)) {
-        matches.push({ fullName: base.name, tech: base.tech, baseRef: base.ref, baseP: base.price, probeP: 0, totalP: base.price, baseImg: base.img, min: base.min, max: base.max, acc: base.acc, recScore: base.baseScore + 5, accVal: 5 });
+        matches.push({ fullName: base.name, tech: base.tech, baseRef: base.ref, totalP: base.price, baseImg: base.img, min: base.min, max: base.max, acc: base.acc, recScore: base.baseScore, accVal: 5 });
       }
     } else {
       probes.forEach(p => {
         if (p.type !== base.input) return;
-        if (p.novaOnly && base.tech !== 'nova') return;
         if (p.min <= fMax && p.max >= fMin && (!humReq || p.hum)) {
-          matches.push({ fullName: `${base.name} + ${p.name}`, tech: base.tech, baseRef: base.ref, probeRef: p.ref, baseP: base.price, probeP: p.price, totalP: base.price + p.price, baseImg: base.img, probeImg: p.img, min: p.min, max: p.max, acc: p.acc, recScore: base.baseScore + p.accRank, accVal: p.accRank });
+          matches.push({ fullName: `${base.name} + ${p.name}`, tech: base.tech, baseRef: base.ref, probeRef: p.ref, totalP: base.price + p.price, baseImg: base.img, probeImg: p.img, min: p.min, max: p.max, acc: p.acc, recScore: base.baseScore + (p.accRank/2), accVal: p.accRank });
         }
       });
     }
@@ -159,31 +146,21 @@ function search(){
   else if (sort === "accuracy") matches.sort((a,b) => b.accVal - a.accVal);
   else matches.sort((a,b) => b.recScore - a.recScore);
 
-  render("recommendations", matches.slice(0, 3), unit, lang, true);
-  render("results", matches.slice(3), unit, lang, false);
+  // Split logic: Recommendations are items with recScore >= 10
+  const best = matches.filter(m => m.recScore >= 10);
+  const others = matches.filter(m => m.recScore < 10);
+
+  render("recommendations", best, unit, lang, true);
+  render("results", others, unit, lang, false);
 }
 
-function render(containerId, list, unit, lang, isHighlight) {
+function render(id, list, unit, lang, isHighlight) {
   const t = i18n[lang];
-  const section = document.getElementById(containerId);
+  const section = document.getElementById(id);
   section.innerHTML = list.map(m => {
     let dRange = (unit === "F") ? `${cToF(m.min).toFixed(0)} to ${cToF(m.max).toFixed(0)}°F` : `${m.min} to ${m.max}°C`;
     let dAcc = (typeof m.acc === 'number') ? (unit === "F" ? `±${accToF(m.acc).toFixed(2)}°F` : `±${m.acc}°C`) : m.acc;
-    return `
-    <div class="card ${isHighlight ? 'highlight' : ''}">
-      <div class="visual-header">
-        <div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">${t.recorder}</span></div>
-        ${m.probeImg ? `<div style="font-size:20px; color:#ccc;">+</div><div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">${t.probe}</span></div>` : ''}
-      </div>
-      <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
-      <b style="display:block; font-size:0.95rem; margin-bottom:5px;">${m.fullName}</b>
-      <div style="font-size:0.75rem; color:#666; margin-bottom:8px;">Ref: #${m.baseRef}${m.probeRef ? ' + #' + m.probeRef : ''}</div>
-      <div class="breakdown">
-        <div><b>${t.rangeInfo}</b> ${dRange} | <b>${t.accInfo}</b> ${dAcc}</div>
-        <hr style="border:0; border-top:1px solid #eee; margin:8px 0;">
-        <div class="total-row" style="display:flex; justify-content:space-between;"><span>${t.totalSystem}</span> <span>$${m.totalP.toFixed(2)} USD</span></div>
-      </div>
-    </div>`;
+    return `<div class="card ${isHighlight ? 'highlight' : ''}"><div class="visual-header"><div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">${t.recorder}</span></div>${m.probeImg ? `<div style="font-size:20px; color:#ccc;">+</div><div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">${t.probe}</span></div>` : ''}</div><span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span><b style="display:block; font-size:0.95rem; margin-bottom:5px;">${m.fullName}</b><div style="font-size:0.75rem; color:#666; margin-bottom:8px;">Ref: #${m.baseRef}${m.probeRef ? ' + #' + m.probeRef : ''}</div><div class="breakdown"><div><b>${t.rangeInfo}</b> ${dRange} | <b>${t.accInfo}</b> ${dAcc}</div><hr style="border:0; border-top:1px solid #eee; margin:8px 0;"><div class="total-row" style="display:flex; justify-content:space-between;"><span>${t.totalSystem}</span> <span>$${m.totalP.toFixed(2)} USD</span></div></div></div>`;
   }).join("");
   section.parentElement.style.display = list.length > 0 ? "block" : "none";
 }
