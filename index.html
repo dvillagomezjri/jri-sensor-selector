@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.34</title>
+  <title>JRI Project Configurator v2.35</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
@@ -63,7 +63,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.3rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.34 | Expanded Price Breakdown</p>
+      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.35 | Corrected Hardware Compatibility</p>
     </div>
   </header>
 
@@ -124,8 +124,9 @@ const baseUnits = [
 ];
 
 const probes = [
-  {ref:"12366", name:"Precision TH Industrial Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"digital", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
-  {ref:"12367", name:"Precision TH Industrial Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"digital", img:"12367 Precision TH transmitter – Industrial ambient.png", hum:true, cable: false},
+  // 12366 & 12367 corrected to type "analog" so they only match Nano U and LoRa U
+  {ref:"12366", name:"Precision TH Industrial Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"analog", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
+  {ref:"12367", name:"Precision TH Industrial Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"analog", img:"12367 Precision TH transmitter – Industrial ambient.png", hum:true, cable: false},
   {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
   {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
   {ref:"05891", name:"High-Precision PT100", min:-200, max:250, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
