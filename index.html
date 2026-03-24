@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.22</title>
+  <title>JRI Project Configurator v2.25</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
@@ -16,7 +16,7 @@
     .checkbox-group { background: #f9fafb; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
     .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; cursor: pointer; }
     .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .card { border: 1px solid #eee; display: flex; flex-direction: column; position: relative; min-height: 480px; transition: 0.2s; }
+    .card { border: 1px solid #eee; display: flex; flex-direction: column; position: relative; min-height: 580px; transition: 0.2s; }
     .card.highlight { border-top: 5px solid var(--jri-green); }
     .visual-header { display: flex; align-items: center; justify-content: center; gap: 10px; height: 130px; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
     .img-wrap { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
@@ -25,6 +25,7 @@
     .tech-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; color: white; margin-bottom: 5px; }
     .tag-nova { background: var(--nova); } .tag-nano { background: var(--nano); } .tag-lora { background: var(--lora); }
     .breakdown { background: #f9fafb; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-top: auto; border: 1px solid #eee; line-height: 1.4; }
+    .cable-select { width: 100%; padding: 5px; margin-top: 8px; font-size: 0.8rem; border-radius: 4px; border: 1px solid #ccc; }
     .add-btn { width: 100%; background: var(--jri-green); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     .btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     .toggle-group { display: flex; gap: 5px; margin-bottom: 15px; }
@@ -40,7 +41,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.6rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.22 | Full Price Breakdown & Image Restoration</p>
+      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.25 | Industrial Cable Selection & Dynamic Pricing</p>
     </div>
   </header>
 
@@ -52,8 +53,8 @@
       </div>
       <label>Target Temperature Range</label>
       <div style="display:flex; gap:10px;">
-        <input type="number" id="minTemp" value="2" onchange="search()">
-        <input type="number" id="maxTemp" value="8" onchange="search()">
+        <input type="number" id="minTemp" value="-100" onchange="search()">
+        <input type="number" id="maxTemp" value="200" onchange="search()">
       </div>
       <label style="margin-top:10px; display:block;">Humidity Required?</label>
       <select id="humidity" onchange="search()"><option value="no">No</option><option value="yes">Yes</option></select>
@@ -104,15 +105,17 @@ const baseUnits = [
 ];
 
 const probes = [
-  {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png"},
-  {ref:"05891", name:"High-Precision PT100", min:-200, max:250, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png"},
-  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png"},
-  {ref:"12366", name:"Industrial TH Transmitter", min:-40, max:180, acc:"±0.2°C", price: 345, type:"digital", img:"12366 Precision temperature and humidity transmitter – Industrial enclosure.png", hum:true},
-  {ref:"13264", name:"Industrial PT100", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png"},
-  {ref:"06154", name:"PT100 Bending Spring", min:0, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png"},
-  {ref:"05836", name:"PT100 Immersion Probe", min:-50, max:180, acc:"Class A", price: 145, type:"analog", img:"05836 PT100 Immersion Temperature Probe.png"},
-  {ref:"13357", name:"Thin PT100 Probe", min:-50, max:600, acc:"±0.1°C", price: 198, type:"analog", img:"13357 Thin PT100 probe.png"}
+  {ref:"12366", name:"Industrial TH - Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"digital", img:"12366 Precision temperature and humidity transmitter – Industrial enclosure.png", hum:true, cable: true},
+  {ref:"12367", name:"Industrial TH - Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"digital", img:"12367.png", hum:true, cable: false},
+  {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
+  {ref:"05891", name:"High-Precision PT100", min:-200, max:250, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
+  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
+  {ref:"13264", name:"Industrial PT100 (High-Temp)", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
+  {ref:"06154", name:"PT100 with Bending Spring", min:0, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png", cable: true},
+  {ref:"13357", name:"Thin PT100 Probe", min:-50, max:600, acc:"±0.1°C", price: 198, type:"analog", img:"13357 Thin PT100 probe.png", cable: true}
 ];
+
+const cablePricing = { "3m": 0, "10m": 15, "25m": 45 };
 
 let projectCart = [];
 
@@ -129,18 +132,18 @@ function search(){
     if (!sTechs.includes(base.tech)) return;
     if (base.input === "fixed") {
       if (base.min <= fMin && base.max >= fMax && (!humReq || base.hum)) {
-        matches.push({ id: base.ref, fullName: base.name, tech: base.tech, recP: base.price, probeP: 0, totalP: base.price, baseImg: base.img, score: base.score, min: base.min, max: base.max, acc: base.acc });
+        matches.push({ id: base.ref, fullName: base.name, tech: base.tech, recR: base.ref, recP: base.price, probeR: "", probeP: 0, baseImg: base.img, score: base.score, min: base.min, max: base.max, acc: base.acc, hasCable: false });
       }
     } else {
       probes.forEach(p => {
         if (p.type === base.input && p.min <= fMin && p.max >= fMax && (!humReq || p.hum)) {
-          matches.push({ id: base.ref + "-" + p.ref, fullName: `${base.name} + ${p.name}`, tech: base.tech, recP: base.price, probeP: p.price, totalP: base.price + p.price, baseImg: base.img, probeImg: p.img, score: base.score, min: p.min, max: p.max, acc: p.acc });
+          matches.push({ id: base.ref + "-" + p.ref, fullName: `${base.name} + ${p.name}`, tech: base.tech, recR: base.ref, recP: base.price, probeR: p.ref, probeP: p.price, baseImg: base.img, probeImg: p.img, score: base.score, min: p.min, max: p.max, acc: p.acc, hasCable: p.cable });
         }
       });
     }
   });
 
-  if (sort === "priceLow") matches.sort((a,b) => a.totalP - b.totalP);
+  if (sort === "priceLow") matches.sort((a,b) => (a.recP + a.probeP) - (b.recP + b.probeP));
   else matches.sort((a,b) => b.score - a.score);
 
   renderList(matches.filter(m => m.score >= 8), "recommendations", true);
@@ -149,7 +152,9 @@ function search(){
 
 function renderList(list, id, highlight) {
   const container = document.getElementById(id);
-  container.innerHTML = list.map(m => `
+  container.innerHTML = list.map(m => {
+    const uniqueId = m.id.replace(/\W/g, '');
+    return `
     <div class="card ${highlight ? 'highlight' : ''}">
       <div class="visual-header">
         <div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">Recorder</span></div>
@@ -157,21 +162,38 @@ function renderList(list, id, highlight) {
       </div>
       <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
       <b style="display:block; min-height:40px;">${m.fullName}</b>
+      <div style="font-size:0.75rem; color:#666; margin-bottom:10px;">Ref: #${m.recR}${m.probeR ? ' + #' + m.probeR : ''}</div>
       <div class="breakdown">
-        <strong>Range:</strong> ${m.min} to ${m.max}°C<br>
-        <strong>Accuracy:</strong> ${m.acc}<br>
-        <div style="margin-top:5px;">Recorder: $${m.recP.toFixed(2)}</div>
+        <strong>Range:</strong> ${m.min} to ${m.max}°C | <strong>Acc:</strong> ${m.acc}<br>
+        ${m.hasCable ? `
+          <label style="font-size:0.7rem; color:#444;">Select Cable Length:</label>
+          <select id="cable-${uniqueId}" class="cable-select" onchange="updateCardPrice('${uniqueId}', ${m.recP}, ${m.probeP})">
+            <option value="3m">3 Meters (Standard)</option>
+            <option value="10m">10 Meters (+$15.00)</option>
+            <option value="25m">25 Meters (+$45.00)</option>
+          </select>` : ''}
+        <div style="margin-top:8px;">Recorder: $${m.recP.toFixed(2)}</div>
         ${m.probeP > 0 ? `<div>Probe: $${m.probeP.toFixed(2)}</div>` : ''}
-        <div class="price-calc">Total: $${m.totalP.toFixed(2)}</div>
+        <div class="price-calc">Total: $<span id="total-${uniqueId}">${(m.recP + m.probeP).toFixed(2)}</span></div>
       </div>
-      <button class="add-btn" onclick="addToProject('${m.id}', '${m.fullName}', ${m.totalP})">Add to Project +</button>
-    </div>`).join("");
+      <button class="add-btn" onclick="addToProject('${m.id}', '${m.fullName}', ${m.recP}, ${m.probeP}, '${uniqueId}', ${m.hasCable})">Add to Project +</button>
+    </div>`;
+  }).join("");
   container.parentElement.style.display = list.length > 0 ? "block" : "none";
 }
 
-function addToProject(id, name, price) {
-  const ex = projectCart.find(i => i.id === id);
-  if (ex) ex.qty++; else projectCart.push({id, name, price, qty:1});
+function updateCardPrice(uid, recP, probeP) {
+  const cableVal = document.getElementById(`cable-${uid}`).value;
+  const newTotal = recP + probeP + cablePricing[cableVal];
+  document.getElementById(`total-${uid}`).innerText = newTotal.toFixed(2);
+}
+
+function addToProject(id, name, recP, probeP, uid, hasCable) {
+  const cable = hasCable ? document.getElementById(`cable-${uid}`).value : "N/A";
+  const cablePrice = hasCable ? cablePricing[cable] : 0;
+  const totalPrice = recP + probeP + cablePrice;
+  
+  projectCart.push({ id, name, price: totalPrice, cable });
   updateCart();
 }
 
@@ -180,14 +202,17 @@ function updateCart() {
   let total = 0;
   if (projectCart.length === 0) { container.innerHTML = '<p style="color:#999;">Select units...</p>'; document.getElementById("project-total").innerText = "0.00"; return; }
   container.innerHTML = projectCart.map(item => {
-    total += item.price * item.qty;
-    return `<div style="font-size:0.85rem; padding:10px 0; border-bottom:1px solid #eee;"><b>${item.name}</b><br>Qty: ${item.qty} - $${(item.price*item.qty).toFixed(2)}</div>`;
+    total += item.price;
+    return `<div style="font-size:0.85rem; padding:10px 0; border-bottom:1px solid #eee;">
+      <b>${item.name}</b><br>
+      <small>Cable: ${item.cable}</small> - <b>$${item.price.toFixed(2)}</b>
+    </div>`;
   }).join("");
   document.getElementById("project-total").innerText = total.toFixed(2);
 }
 
 function clearCart() { projectCart = []; updateCart(); }
-function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Project_Summary.pdf"); }
+function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Config_Quote.pdf"); }
 
 search();
 </script>
