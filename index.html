@@ -3,49 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.32</title>
+  <title>JRI Project Configurator v2.33</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; }
-    .container { max-width: 1750px; margin: auto; padding: 20px; }
-    .dashboard { display: grid; grid-template-columns: 340px 1fr 380px; gap: 20px; }
-    .controls, .project-cart, .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-    header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; border-bottom: 4px solid var(--jri-blue); padding-bottom: 10px; }
-    .logo { height: 45px; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; color: #333; font-size: 0.85rem; }
+    .container { max-width: 1750px; margin: auto; padding: 15px; }
+    .dashboard { display: grid; grid-template-columns: 320px 1fr 350px; gap: 15px; }
+    
+    .controls, .project-cart, .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); }
+    header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; border-bottom: 3px solid var(--jri-blue); padding-bottom: 8px; }
+    .logo { height: 40px; }
 
-    /* BLUE TOGGLES */
-    .toggle-group { display: flex; gap: 5px; margin-bottom: 15px; }
-    .toggle-group label { flex: 1; text-align: center; padding: 10px; background: #eee; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    /* BLUE TOGGLES (Restored to compact) */
+    .toggle-group { display: flex; gap: 4px; margin-bottom: 12px; }
+    .toggle-group label { flex: 1; text-align: center; padding: 8px; background: #eee; border-radius: 5px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
     .toggle-group input:checked + label { background: var(--jri-blue); color: white; }
     .toggle-group input { display: none; }
 
     /* FIXED RANGE BOXES */
-    .range-container { display: flex; gap: 10px; margin-bottom: 15px; }
+    .range-container { display: flex; gap: 8px; margin-bottom: 12px; }
     .range-box { flex: 1; }
-    .range-box input { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
-    .range-box small { display: block; font-size: 0.7rem; color: #777; margin-top: 4px; text-transform: uppercase; text-align: center; }
+    .range-box input { width: 100%; padding: 8px; border: 1px solid #cbd5e0; border-radius: 5px; box-sizing: border-box; font-size: 0.8rem; }
+    .range-box small { display: block; font-size: 0.65rem; color: #777; margin-top: 3px; text-transform: uppercase; text-align: center; }
 
-    .checkbox-group { background: #f9fafb; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
-    .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; }
+    .checkbox-group { background: #f9fafb; padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .checkbox-item { display: flex; align-items: center; gap: 4px; font-size: 0.8rem; }
 
-    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .card { border: 1px solid #eee; display: flex; flex-direction: column; min-height: 580px; }
-    .card.highlight { border-top: 5px solid var(--jri-green); }
-
-    .visual-header { display: flex; align-items: center; justify-content: center; height: 130px; border-bottom: 1px solid #f0f0f0; margin-bottom: 10px; background: #fff; }
-    .img-wrap { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
-    .img-wrap img { max-width: 85%; max-height: 85%; object-fit: contain; }
-    .img-label { position: absolute; bottom: 0; font-size: 0.55rem; color: #999; background: rgba(255,255,255,0.8); padding: 0 4px; }
+    /* RESULTS GRID */
+    .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 12px; margin-bottom: 25px; }
     
-    .tech-tag { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; color: white; margin-bottom: 8px; }
+    /* MODIFICATION START: COMPACT CARD LAYOUT */
+    .card { border: 1px solid #eee; display: flex; flex-direction: column; min-height: 380px; padding: 12px; }
+    .card.highlight { border-top: 4px solid var(--jri-green); }
+
+    .visual-header { display: flex; align-items: center; justify-content: center; height: 100px; border-bottom: 1px solid #f0f0f0; margin-bottom: 8px; background: #fff; }
+    .img-wrap { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+    .img-wrap img { max-width: 80%; max-height: 80%; object-fit: contain; }
+    .img-label { position: absolute; bottom: 0; font-size: 0.5rem; color: #999; background: rgba(255,255,255,0.8); padding: 0 3px; text-transform: uppercase; }
+    
+    .tech-tag { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 0.6rem; font-weight: bold; color: white; margin-bottom: 6px; }
     .tag-nova { background: var(--nova); } .tag-nano { background: var(--nano); } .tag-lora { background: var(--lora); }
     
-    .breakdown { background: #f9fafb; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-top: auto; border: 1px solid #eee; }
-    .price-calc { display: flex; justify-content: space-between; border-top: 1px dashed #ccc; margin-top: 8px; padding-top: 8px; font-weight: bold; color: var(--jri-blue); }
+    .card b { font-size: 0.9rem; display: block; min-height: 38px; line-height: 1.2; margin-bottom: 4px; }
+    .ref-line { font-size: 0.7rem; color: #666; margin-bottom: 8px; }
+
+    .breakdown { background: #f9fafb; padding: 8px; border-radius: 6px; font-size: 0.75rem; margin-top: auto; border: 1px solid #eee; line-height: 1.3; }
+    .breakdown strong { color: #333; }
+    .price-calc { display: flex; justify-content: space-between; border-top: 1px dashed #ccc; margin-top: 6px; padding-top: 6px; font-weight: bold; color: var(--jri-blue); font-size: 0.95rem; }
     
-    .btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-    .add-btn { width: 100%; background: var(--jri-green); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .cable-select { width: 100%; padding: 4px; margin-top: 6px; font-size: 0.75rem; border-radius: 3px; border: 1px solid #ccc; }
+    .add-btn { width: 100%; background: var(--jri-green); color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.8rem; }
+    /* MODIFICATION END */
+    
+    .btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+    select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; margin-bottom: 12px; font-size: 0.8rem; }
+    
+    /* CART COMPACT */
+    .project-cart { position: sticky; top: 15px; height: fit-content; border-left: 3px solid var(--jri-blue); }
+    .total-box { margin-top: 15px; font-size: 1.1rem; font-weight: bold; color: var(--jri-blue); border-top: 2px solid var(--jri-blue); padding-top: 8px; }
   </style>
 </head>
 <body>
@@ -53,29 +69,29 @@
   <header>
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
-      <h1 style="color: var(--jri-blue); margin:0; font-size: 1.6rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.32 | Complete Catalog & UI Fix</p>
+      <h1 style="color: var(--jri-blue); margin:0; font-size: 1.3rem;">JRI Project Configurator</h1>
+      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.33 | Compact Layout Restoration & Full Catalog Preservation</p>
     </div>
   </header>
 
   <div class="dashboard">
     <div class="controls">
-      <label style="font-weight: bold; font-size: 0.85rem;">Units</label>
+      <label style="font-weight: bold;">Units</label>
       <div class="toggle-group">
         <input type="radio" id="unitC" name="unit" value="C" checked><label for="unitC">°Celsius</label>
         <input type="radio" id="unitF" name="unit" value="F"><label for="unitF">°Fahrenheit</label>
       </div>
 
-      <label style="font-weight: bold; font-size: 0.85rem;">Target Temperature Range</label>
+      <label style="font-weight: bold;">Target Range</label>
       <div class="range-container">
         <div class="range-box"><input type="number" id="minTemp" value="2"><small>Minimum</small></div>
         <div class="range-box"><input type="number" id="maxTemp" value="8"><small>Maximum</small></div>
       </div>
 
-      <label style="font-weight: bold; font-size: 0.85rem;">Humidity Required?</label>
+      <label style="font-weight: bold;">Humidity Required?</label>
       <select id="humidity"><option value="no">No</option><option value="yes">Yes</option></select>
       
-      <label style="font-weight: bold; font-size: 0.85rem;">Recorder Range</label>
+      <label style="font-weight: bold;">Recorder Range</label>
       <div class="checkbox-group">
         <label class="checkbox-item"><input type="checkbox" name="tech" value="nova" checked> Nova</label>
         <label class="checkbox-item"><input type="checkbox" name="tech" value="nano" checked> Nano</label>
@@ -92,18 +108,16 @@
 
     <div class="project-cart" id="project-list">
       <h3 style="margin:0;">📋 Project List</h3>
-      <div id="cart-items" style="margin-top:15px;"><p style="color:#999;">Empty List</p></div>
-      <div style="margin-top:20px; font-size: 1.3rem; font-weight: bold; color: var(--jri-blue); border-top: 2px solid var(--jri-blue); padding-top: 10px;">
-        Total: $<span id="project-total">0.00</span>
-      </div>
-      <button class="btn-primary" style="background:#4a5568; margin-top:10px;" onclick="exportPDF()">Export Project PDF</button>
-      <button style="border:none; background:none; color:red; cursor:pointer; font-size:0.75rem; margin-top:10px; width:100%;" onclick="clearCart()">Clear All</button>
+      <div id="cart-items" style="margin-top:12px;"><p style="color:#999; font-size:0.75rem;">Empty List</p></div>
+      <div class="total-box">Total: $<span id="project-total">0.00</span> USD</div>
+      <button class="btn-primary" style="background:#4a5568; margin-top:8px; padding:10px; font-size:0.8rem;" onclick="exportPDF()">Export Project PDF</button>
+      <button style="border:none; background:none; color:red; cursor:pointer; font-size:0.7rem; margin-top:8px; width:100%;" onclick="clearCart()">Clear All</button>
     </div>
   </div>
 </div>
 
 <script>
-// FULL CATALOG RESTORED
+// FULL CATALOG PRESERVED (including 13947 reference sensor)
 const baseUnits = [
   {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, score: 10},
   {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, score: 10},
@@ -124,7 +138,7 @@ const probes = [
   {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
   {ref:"05891", name:"High-Precision PT100", min:-200, max:250, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
   {ref:"13264", name:"Industrial PT100 (High-Temp)", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
-  {ref:"06154", name:"PT100 Bending Spring", min:0, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png", cable: true},
+  {ref:"06154", name:"PT100 with Bending Spring", min:0, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png", cable: true},
   {ref:"13357", name:"Thin PT100 Probe", min:-50, max:600, acc:"±0.1°C", price: 198, type:"analog", img:"13357 Thin PT100 probe.png", cable: true}
 ];
 
@@ -154,6 +168,7 @@ function search(){
       });
     }
   });
+
   renderList(matches.filter(m => m.score >= 8), "recommendations", true);
   renderList(matches.filter(m => m.score < 8), "results", false);
 }
@@ -169,15 +184,15 @@ function renderList(list, id, highlight) {
         ${m.probeImg ? `<div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">Probe</span></div>` : ''}
       </div>
       <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
-      <b style="display:block; min-height:45px;">${m.fullName}</b>
-      <div style="font-size:0.75rem; color:#666; margin-bottom:10px;">Ref: #${m.recR}${m.probeR ? ' + #' + m.probeR : ''}</div>
+      <b>${m.fullName}</b>
+      <div class="ref-line">Ref: #${m.recR}${m.probeR ? ' + #' + m.probeR : ''}</div>
       <div class="breakdown">
-        Range: ${m.min} to ${m.max}°C | Acc: ${m.acc}<br>
+        <strong>Range:</strong> ${m.min}/${m.max}°C | <strong>Acc:</strong> ${m.acc}<br>
         ${m.hasCable ? `
-          <select id="cable-${uniqueId}" style="margin-top:10px; width:100%;" onchange="updateCardPrice('${uniqueId}', ${m.recP}, ${m.probeP})">
+          <select id="cable-${uniqueId}" class="cable-select" onchange="updateCardPrice('${uniqueId}', ${m.recP}, ${m.probeP})">
             <option value="3m">3m Cable</option>
-            <option value="10m">10m (+$15)</option>
-            <option value="25m">25m (+$45)</option>
+            <option value="10m">10m Cable (+$15)</option>
+            <option value="25m">25m Cable (+$45)</option>
           </select>` : ''}
         <div class="price-calc">Total: $<span id="total-${uniqueId}">${(m.recP + m.probeP).toFixed(2)}</span></div>
       </div>
@@ -202,16 +217,19 @@ function addToProject(id, name, recP, probeP, uid, hasCable) {
 function updateCart() {
   const container = document.getElementById("cart-items");
   let total = 0;
-  if (projectCart.length === 0) { container.innerHTML = '<p style="color:#999;">Empty List</p>'; document.getElementById("project-total").innerText = "0.00"; return; }
+  if (projectCart.length === 0) { container.innerHTML = '<p style="color:#999; font-size:0.75rem;">Empty List</p>'; document.getElementById("project-total").innerText = "0.00"; return; }
   container.innerHTML = projectCart.map(item => {
     total += item.price;
-    return `<div style="font-size:0.85rem; padding:8px 0; border-bottom:1px solid #eee;"><b>${item.name}</b><br><small>Cable: ${item.cable}</small> - $${item.price.toFixed(2)}</div>`;
+    return `<div style="font-size:0.75rem; padding:6px 0; border-bottom:1px solid #eee;">
+      <b>${item.name}</b><br>
+      <small>Cable: ${item.cable}</small> - $${item.price.toFixed(2)}
+    </div>`;
   }).join("");
   document.getElementById("project-total").innerText = total.toFixed(2);
 }
 
 function clearCart() { projectCart = []; updateCart(); }
-function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Quote.pdf"); }
+function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Config_Quote.pdf"); }
 </script>
 </body>
 </html>
