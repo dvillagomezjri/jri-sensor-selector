@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.36</title>
+  <title>JRI Project Configurator v2.37</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
@@ -53,7 +53,6 @@
     .btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
     select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; margin-bottom: 12px; font-size: 0.8rem; }
 
-    /* Library Style */
     .library-section { border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px; }
     .library-label { font-size: 0.75rem; font-weight: bold; color: #666; margin-bottom: 5px; display: block; }
     
@@ -67,7 +66,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.3rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.36 | Reference Library & Extended Database</p>
+      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.37 | Full Catalog Integration</p>
     </div>
   </header>
 
@@ -98,25 +97,8 @@
       <button class="btn-primary" onclick="search()">Update Search Results</button>
 
       <div class="library-section">
-        <span class="library-label">🛠️ Hardware Reference (Non-Filtering)</span>
-        <select id="hardwareRef" style="margin-bottom:5px;">
-           <option>Select for Reference Only...</option>
-           <optgroup label="Recorders">
-              <option>11567E - Nano SPY T1 (Fixed)</option>
-              <option>11569E - Nano SPY T2 (External)</option>
-              <option>11570E - Nano SPY T3 (Cryo)</option>
-              <option>11568E - Nano SPY TH</option>
-              <option>11571E - Nano SPY U (Analog)</option>
-              <option>11802E - LoRa SPY T1</option>
-              <option>11810E - LoRa SPY U</option>
-           </optgroup>
-           <optgroup label="Probes">
-              <option>13947 - Digital Reference</option>
-              <option>12366 - Industrial TH Enclosure</option>
-              <option>13264 - PT100 High-Temp</option>
-              <option>05891 - High-Precision PT100</option>
-           </optgroup>
-        </select>
+        <span class="library-label">🛠️ Hardware Reference (Full List)</span>
+        <select id="hardwareRef" style="margin-bottom:5px;"></select>
       </div>
     </div>
 
@@ -137,33 +119,54 @@
 
 <script>
 const baseUnits = [
-  {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, score: 10},
-  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, score: 10},
-  {ref:"11568E", name:"Nano SPY TH", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
-  {ref:"11569E", name:"Nano SPY T2 (External)", tech:"nano", price: 125, img:"Nano SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.4°C", hum:false, score: 10},
-  {ref:"11570E", name:"Nano SPY T3 (Cryo)", tech:"nano", price: 145, img:"Nano SPY T3.png", input:"fixed", min:-200, max:0, acc:"±0.5°C", hum:false, score: 8},
-  {ref:"11802E", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, score: 10},
-  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
-  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", score: 5},
-  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", score: 5},
-  {ref:"13491", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", input:"digital", score: 5},
-  {ref:"11571E", name:"Nano SPY U", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", score: 4},
-  {ref:"11810E", name:"LoRa SPY U", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", score: 4}
+  {ref:"13763X", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, score: 10},
+  {ref:"13756X", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", score: 5},
+  {ref:"11567X", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.3°C", hum:false, score: 10},
+  {ref:"11568X", name:"Nano SPY TH Ambient", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
+  {ref:"13240X", name:"Nano SPY TH Precision", tech:"nano", price: 215, img:"Nano SPY TH.png", input:"fixed", min:-40, max:85, acc:"±0.2°C / 2%RH", hum:true, score: 10},
+  {ref:"11569X", name:"Nano SPY T2 (External)", tech:"nano", price: 125, img:"Nano SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.2°C", hum:false, score: 10},
+  {ref:"12540X", name:"Nano SPY Universal (U)", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", score: 4},
+  {ref:"13491X", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", input:"digital", score: 5},
+  {ref:"12266X", name:"LoRa SPY T0", tech:"lora", price: 230, img:"LoRa SPY T1.png", input:"fixed", min:-35, max:85, acc:"±0.5°C", hum:false, score: 10},
+  {ref:"12267X", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, score: 10},
+  {ref:"12269X", name:"LoRa SPY T2", tech:"lora", price: 260, img:"LoRa SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.3°C", hum:false, score: 10},
+  {ref:"12273X", name:"LoRa SPY T3 (Low Temp)", tech:"lora", price: 275, img:"LoRa SPY T3.png", input:"fixed", min:-200, max:0, acc:"±0.2°C", hum:false, score: 10},
+  {ref:"12268X", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
+  {ref:"12409X", name:"LoRa SPY Reference", tech:"lora", price: 380, img:"LoRa SPY T1.png", input:"fixed", min:-196, max:200, acc:"±0.12°C", hum:false, score: 9},
+  {ref:"12484X", name:"LoRa TEMP", tech:"lora", price: 220, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.5°C", hum:false, score: 7},
+  {ref:"12276X", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", score: 5},
+  {ref:"11810X", name:"LoRa SPY Universal (U)", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", score: 4}
 ];
 
 const probes = [
-  {ref:"12366", name:"Precision TH Industrial Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"analog", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
-  {ref:"12367", name:"Precision TH Industrial Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"analog", img:"12367 Precision TH transmitter – Industrial ambient.png", hum:true, cable: false},
-  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
-  {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
-  {ref:"05891", name:"High-Precision PT100", min:-200, max:250, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
-  {ref:"13264", name:"Industrial PT100 (High-Temp)", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
-  {ref:"06154", name:"PT100 with Bending Spring", min:0, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png", cable: true},
-  {ref:"13357", name:"Thin PT100 Probe", min:-50, max:600, acc:"±0.1°C", price: 198, type:"analog", img:"13357 Thin PT100 probe.png", cable: true}
+  {ref:"13984", name:"Green Digital Low Temp", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
+  {ref:"13947", name:"Green Digital Ref", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
+  {ref:"14129", name:"Green Digital Ref Short", min:-40, max:80, acc:"±0.15°C", price: 175, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
+  {ref:"13993", name:"Green Digital Temp Long", min:-40, max:80, acc:"±0.2°C", price: 150, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
+  {ref:"12347", name:"Green Digital TH Sensor", min:-30, max:70, acc:"±0.3°C / 2%RH", price: 210, type:"digital", img:"12347 Green Digital Temperature and Humidity Sensor.png", hum:true, cable: true},
+  {ref:"12366", name:"Industrial TH Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"analog", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
+  {ref:"12367", name:"Industrial TH Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"analog", img:"12367 Precision TH transmitter – Industrial ambient.png", hum:true, cable: false},
+  {ref:"05891", name:"High-Precision PT100", min:-200, max:260, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
+  {ref:"13572", name:"Autoclave PT100", min:-50, max:180, acc:"Class A", price: 190, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
+  {ref:"13264", name:"Industrial PT100 High-Temp", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
+  {ref:"06154", name:"PT100 Bending Spring", min:-50, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png", cable: true},
+  {ref:"05836", name:"Immersion PT100", min:-50, max:180, acc:"Class A", price: 170, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
+  {ref:"13357", name:"Thin PT100 Probe", min:-50, max:600, acc:"±0.1°C", price: 198, type:"analog", img:"13357 Thin PT100 probe.png", cable: true},
+  {ref:"05936", name:"Penetration PT100", min:-60, max:180, acc:"Class A", price: 165, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true}
 ];
 
 const cablePricing = { "3m": 0, "10m": 15, "25m": 45 };
 let projectCart = [];
+
+function populateLibrary() {
+  const lib = document.getElementById("hardwareRef");
+  let html = '<option>Select for Reference Only...</option><optgroup label="Recorders">';
+  baseUnits.forEach(b => html += `<option>${b.ref} - ${b.name}</option>`);
+  html += '</optgroup><optgroup label="Probes">';
+  probes.forEach(p => html += `<option>${p.ref} - ${p.name}</option>`);
+  html += '</optgroup>';
+  lib.innerHTML = html;
+}
 
 function search(){
   const unit = document.querySelector('input[name="unit"]:checked').value;
@@ -254,6 +257,8 @@ function updateCart() {
 
 function clearCart() { projectCart = []; updateCart(); }
 function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Config_Quote.pdf"); }
+
+populateLibrary();
 </script>
 </body>
 </html>
