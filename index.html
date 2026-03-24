@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.35</title>
+  <title>JRI Project Configurator v2.36</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
@@ -52,6 +52,10 @@
     
     .btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
     select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; margin-bottom: 12px; font-size: 0.8rem; }
+
+    /* Library Style */
+    .library-section { border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px; }
+    .library-label { font-size: 0.75rem; font-weight: bold; color: #666; margin-bottom: 5px; display: block; }
     
     .project-cart { position: sticky; top: 15px; height: fit-content; border-left: 3px solid var(--jri-blue); }
     .total-box { margin-top: 15px; font-size: 1.1rem; font-weight: bold; color: var(--jri-blue); border-top: 2px solid var(--jri-blue); padding-top: 8px; }
@@ -63,7 +67,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.3rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.35 | Corrected Hardware Compatibility</p>
+      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.36 | Reference Library & Extended Database</p>
     </div>
   </header>
 
@@ -77,8 +81,8 @@
 
       <label style="font-weight: bold;">Temp Range</label>
       <div class="range-container">
-        <div class="range-box"><input type="number" id="minTemp" value="2"><small>Minimum</small></div>
-        <div class="range-box"><input type="number" id="maxTemp" value="8"><small>Maximum</small></div>
+        <div class="range-box"><input type="number" id="minTemp" value="2"><small>Min</small></div>
+        <div class="range-box"><input type="number" id="maxTemp" value="8"><small>Max</small></div>
       </div>
 
       <label style="font-weight: bold;">Humidity Required?</label>
@@ -92,6 +96,28 @@
       </div>
       
       <button class="btn-primary" onclick="search()">Update Search Results</button>
+
+      <div class="library-section">
+        <span class="library-label">🛠️ Hardware Reference (Non-Filtering)</span>
+        <select id="hardwareRef" style="margin-bottom:5px;">
+           <option>Select for Reference Only...</option>
+           <optgroup label="Recorders">
+              <option>11567E - Nano SPY T1 (Fixed)</option>
+              <option>11569E - Nano SPY T2 (External)</option>
+              <option>11570E - Nano SPY T3 (Cryo)</option>
+              <option>11568E - Nano SPY TH</option>
+              <option>11571E - Nano SPY U (Analog)</option>
+              <option>11802E - LoRa SPY T1</option>
+              <option>11810E - LoRa SPY U</option>
+           </optgroup>
+           <optgroup label="Probes">
+              <option>13947 - Digital Reference</option>
+              <option>12366 - Industrial TH Enclosure</option>
+              <option>13264 - PT100 High-Temp</option>
+              <option>05891 - High-Precision PT100</option>
+           </optgroup>
+        </select>
+      </div>
     </div>
 
     <div id="main-display">
@@ -114,6 +140,8 @@ const baseUnits = [
   {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, score: 10},
   {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, score: 10},
   {ref:"11568E", name:"Nano SPY TH", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
+  {ref:"11569E", name:"Nano SPY T2 (External)", tech:"nano", price: 125, img:"Nano SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.4°C", hum:false, score: 10},
+  {ref:"11570E", name:"Nano SPY T3 (Cryo)", tech:"nano", price: 145, img:"Nano SPY T3.png", input:"fixed", min:-200, max:0, acc:"±0.5°C", hum:false, score: 8},
   {ref:"11802E", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, score: 10},
   {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
   {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", score: 5},
@@ -124,7 +152,6 @@ const baseUnits = [
 ];
 
 const probes = [
-  // 12366 & 12367 corrected to type "analog" so they only match Nano U and LoRa U
   {ref:"12366", name:"Precision TH Industrial Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"analog", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
   {ref:"12367", name:"Precision TH Industrial Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"analog", img:"12367 Precision TH transmitter – Industrial ambient.png", hum:true, cable: false},
   {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
