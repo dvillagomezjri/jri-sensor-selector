@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.19</title>
+  <title>JRI Project Configurator v2.21</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
@@ -16,7 +16,7 @@
     .checkbox-group { background: #f9fafb; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 8px; }
     .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.85rem; cursor: pointer; }
     .recommendation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .card { border: 1px solid #eee; display: flex; flex-direction: column; position: relative; min-height: 420px; transition: 0.2s; }
+    .card { border: 1px solid #eee; display: flex; flex-direction: column; position: relative; min-height: 440px; }
     .card.highlight { border-top: 5px solid var(--jri-green); }
     .visual-header { display: flex; align-items: center; justify-content: center; gap: 10px; height: 130px; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
     .img-wrap { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
@@ -26,17 +26,12 @@
     .tag-nova { background: var(--nova); } .tag-nano { background: var(--nano); } .tag-lora { background: var(--lora); }
     .breakdown { background: #f9fafb; padding: 10px; border-radius: 8px; font-size: 0.8rem; margin-top: auto; border: 1px solid #eee; }
     .add-btn { width: 100%; background: var(--jri-green); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .project-cart { position: sticky; top: 20px; height: 85vh; display: flex; flex-direction: column; }
-    #cart-items { flex-grow: 1; overflow-y: auto; margin-top: 10px; }
-    .cart-item { font-size: 0.8rem; padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-    .total-box { margin-top: 10px; font-size: 1.2rem; font-weight: bold; color: var(--jri-blue); border-top: 2px solid var(--jri-blue); padding-top: 10px; }
     input, select { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; }
     button.btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     .toggle-group { display: flex; gap: 5px; margin-bottom: 15px; }
-    .toggle-group label { flex: 1; text-align: center; padding: 8px; background: #eee; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+    .toggle-group label { flex: 1; text-align: center; padding: 8px; background: #eee; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
     .toggle-group input:checked + label { background: var(--jri-blue); color: white; }
     .toggle-group input { display: none; }
-    .section-title { border-left: 5px solid var(--jri-blue); padding-left: 15px; margin-top: 0; }
   </style>
 </head>
 <body>
@@ -45,7 +40,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.6rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.19 | Hard-Validation Logic & Interface Restore</p>
+      <p style="color: #666; margin: 0; font-size: 0.9rem;">v2.21 | High-Temp & Industrial Expansion</p>
     </div>
   </header>
   <div class="dashboard">
@@ -54,74 +49,68 @@
         <input type="radio" id="unitC" name="unit" value="C" checked onchange="search()"><label for="unitC">°Celsius</label>
         <input type="radio" id="unitF" name="unit" value="F" onchange="search()"><label for="unitF">°Fahrenheit</label>
       </div>
-      <label style="font-size: 0.9rem;">Temperature Range</label>
+      <label>Target Range</label>
       <div style="display:flex; gap:10px;">
-        <div style="flex:1;"><input type="number" id="minTemp" value="2" onchange="search()"><small style="font-size:0.7rem; color:#777;">Low</small></div>
-        <div style="flex:1;"><input type="number" id="maxTemp" value="8" onchange="search()"><small style="font-size:0.7rem; color:#777;">High</small></div>
+        <input type="number" id="minTemp" value="0" onchange="search()">
+        <input type="number" id="maxTemp" value="600" onchange="search()">
       </div>
-      <label style="font-size: 0.9rem; margin-top:10px; display:block;">Humidity Required?</label>
+      <label>Humidity Required?</label>
       <select id="humidity" onchange="search()"><option value="no">No</option><option value="yes">Yes</option></select>
-      
-      <label style="font-size: 0.9rem;">Recorder Range</label>
+      <label>Recorder Range</label>
       <div class="checkbox-group">
         <label class="checkbox-item"><input type="checkbox" name="tech" value="nova" checked onchange="search()"> Nova</label>
         <label class="checkbox-item"><input type="checkbox" name="tech" value="nano" checked onchange="search()"> Nano</label>
         <label class="checkbox-item"><input type="checkbox" name="tech" value="lora" checked onchange="search()"> LoRa</label>
       </div>
-
-      <label style="font-size: 0.9rem;">Sorting</label>
+      <label>Sorting</label>
       <select id="sortOrder" onchange="search()">
-        <option value="recommend">Best Recommendation</option>
+        <option value="recommend">Recommendation</option>
         <option value="priceLow">Price: Low to High</option>
-        <option value="accuracy">Best Accuracy</option>
       </select>
-      <button class="btn-primary" onclick="search()">Search</button>
     </div>
 
     <div id="main-display">
-        <div id="rec-section"><h3 class="section-title" style="color: var(--jri-green);">⭐ Recommended Solutions</h3><div id="recommendations" class="recommendation-grid"></div></div>
-        <div id="other-section"><h3 class="section-title" style="color: var(--jri-blue);">📋 All Compatible Matches</h3><div id="results" class="recommendation-grid"></div></div>
+      <div id="rec-section"><h3>⭐ Recommended Solutions</h3><div id="recommendations" class="recommendation-grid"></div></div>
+      <div id="other-section"><h3>📋 Compatible Options</h3><div id="results" class="recommendation-grid"></div></div>
     </div>
 
     <div class="project-cart" id="project-list">
-      <h3 style="margin-top: 0;">📋 Project List</h3>
-      <div id="cart-items"><p style="color: #999; font-size: 0.85rem;">Add units to build your quote.</p></div>
+      <h3 style="margin-top:0;">📋 Project List</h3>
+      <div id="cart-items"></div>
       <div class="total-box">Total: $<span id="project-total">0.00</span></div>
-      <button class="btn-primary" style="background:#4a5568; margin-top:15px;" onclick="exportPDF()">Export PDF</button>
-      <button style="background:none; border:none; color:red; cursor:pointer; font-size:0.7rem; margin-top:10px;" onclick="clearCart()">Clear Project</button>
+      <button class="btn-primary" onclick="exportPDF()">Export PDF</button>
     </div>
   </div>
 </div>
 
 <script>
 const baseUnits = [
-  {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, baseScore: 10},
-  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, baseScore: 10},
-  {ref:"11568E", name:"Nano SPY TH", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, baseScore: 10},
-  {ref:"11802E", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, baseScore: 10},
-  {ref:"11803E", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, baseScore: 10},
-  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", baseScore: 5},
-  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", baseScore: 5},
-  {ref:"13491", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", input:"digital", baseScore: 5},
-  {ref:"11571E", name:"Nano SPY U", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", baseScore: 4},
-  {ref:"11810E", name:"LoRa SPY U", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", baseScore: 4}
+  {ref:"13763E", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, score: 10},
+  {ref:"11567E", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.4°C", hum:false, score: 10},
+  {ref:"13756E", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", score: 5},
+  {ref:"11809E", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", score: 5},
+  {ref:"13491", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", input:"digital", score: 5},
+  {ref:"11571E", name:"Nano SPY U", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", score: 4},
+  {ref:"11810E", name:"LoRa SPY U", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", score: 4}
 ];
 
 const probes = [
-  {ref:"13947", name:"Digital Sensor Reference", min:-90, max:180, acc:0.15, price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", accVal: 10},
-  {ref:"14129", name:"Digital Ref Short", min:-40, max:80, acc:0.15, price: 140, type:"digital", img:"14129 Green Digital Sensor Reference Short.png", accVal: 10},
-  {ref:"12347", name:"Digital TH Sensor", min:-30, max:70, acc:0.3, price: 168, type:"digital", img:"12347 Green Digital Temperature and Humidity Sensor.png", hum:true, accVal: 7},
-  {ref:"13264", name:"PT100 Industrial High-Temp", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", accVal: 8}
+  // INDUSTRIAL & HIGH TEMP ADDITIONS
+  {ref:"12366", name:"Industrial TH Transmitter", min:-40, max:180, acc:0.2, price: 345, type:"digital", img:"12366.png", hum:true},
+  {ref:"13264", name:"Industrial PT100 (High-Temp)", min:-50, max:700, acc:0.3, price: 132, type:"analog", img:"13264.png"},
+  {ref:"06154", name:"PT100 with Bending Spring", min:0, max:450, acc:0.3, price: 185, type:"analog", img:"06154.png"},
+  {ref:"05836", name:"PT100 Immersion Probe", min:-50, max:180, acc:0.2, price: 145, type:"analog", img:"05836.png"},
+  {ref:"13357", name:"Thin PT100 Probe (IVF)", min:-50, max:600, acc:0.1, price: 198, type:"analog", img:"13357.png"},
+  // CRYO
+  {ref:"13984", name:"Digital Low Temp Sensor", min:-200, max:0, acc:0.2, price: 195, type:"digital", img:"13984.png"}
 ];
 
 let projectCart = [];
 
 function search(){
   const unit = document.querySelector('input[name="unit"]:checked').value;
-  const sort = document.getElementById("sortOrder").value;
-  let minI = parseFloat(document.getElementById("minTemp").value);
-  let maxI = parseFloat(document.getElementById("maxTemp").value);
-  
+  const minI = parseFloat(document.getElementById("minTemp").value);
+  const maxI = parseFloat(document.getElementById("maxTemp").value);
   const fMin = (unit === "F") ? (minI - 32) * 5/9 : minI;
   const fMax = (unit === "F") ? (maxI - 32) * 5/9 : maxI;
   const humReq = document.getElementById("humidity").value === "yes";
@@ -131,38 +120,33 @@ function search(){
   baseUnits.forEach(base => {
     if (!sTechs.includes(base.tech)) return;
     if (base.input === "fixed") {
-      // STRICT RANGE CHECK: The hardware must encompass the ENTIRE searched range
       if (base.min <= fMin && base.max >= fMax && (!humReq || base.hum)) {
-        matches.push({ id: base.ref, fullName: base.name, tech: base.tech, totalP: base.price, baseImg: base.img, recScore: base.baseScore, min: base.min, max: base.max, acc: base.acc, accVal: 5 });
+        matches.push({ id: base.ref, fullName: base.name, tech: base.tech, totalP: base.price, baseImg: base.img, recScore: base.score, min: base.min, max: base.max });
       }
     } else {
       probes.forEach(p => {
         if (p.type === base.input && p.min <= fMin && p.max >= fMax && (!humReq || p.hum)) {
-          matches.push({ id: base.ref + "-" + p.ref, fullName: `${base.name} + ${p.name}`, tech: base.tech, totalP: base.price + p.price, baseImg: base.img, probeImg: p.img, recScore: base.baseScore + (p.accVal/2), min: p.min, max: p.max, acc: p.acc, accVal: p.accVal });
+          matches.push({ id: base.ref + "-" + p.ref, fullName: `${base.name} + ${p.name}`, tech: base.tech, totalP: base.price + p.price, baseImg: base.img, probeImg: p.img, recScore: base.score });
         }
       });
     }
   });
 
-  if (sort === "priceLow") matches.sort((a,b) => a.totalP - b.totalP);
-  else if (sort === "accuracy") matches.sort((a,b) => b.accVal - a.accVal);
-  else matches.sort((a,b) => b.recScore - a.recScore);
-
-  renderList(matches.filter(m => m.recScore >= 10), "recommendations", true);
-  renderList(matches.filter(m => m.recScore < 10), "results", false);
+  render(matches.filter(m => m.recScore >= 8), "recommendations", true);
+  render(matches.filter(m => m.recScore < 8), "results", false);
 }
 
-function renderList(list, id, highlight) {
+function render(list, id, highlight) {
   const container = document.getElementById(id);
   container.innerHTML = list.map(m => `
     <div class="card ${highlight ? 'highlight' : ''}">
       <div class="visual-header">
         <div class="img-wrap"><img src="${m.baseImg}"><span class="img-label">Recorder</span></div>
-        ${m.probeImg ? `<div style="font-size:20px; color:#ccc;">+</div><div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">Probe</span></div>` : ''}
+        ${m.probeImg ? `<div class="img-wrap"><img src="${m.probeImg}"><span class="img-label">Probe</span></div>` : ''}
       </div>
       <span class="tech-tag tag-${m.tech}">${m.tech.toUpperCase()}</span>
-      <b style="display:block; margin-bottom:5px;">${m.fullName}</b>
-      <div class="breakdown">Range: ${m.min} to ${m.max}°C | Acc: ${m.acc}<br><strong>$${m.totalP.toFixed(2)} USD</strong></div>
+      <b>${m.fullName}</b>
+      <div class="breakdown">Range: ${m.min} to ${m.max}°C<br><strong>$${m.totalP.toFixed(2)} USD</strong></div>
       <button class="add-btn" onclick="addToProject('${m.id}', '${m.fullName}', ${m.totalP})">Add to Project +</button>
     </div>`).join("");
   container.parentElement.style.display = list.length > 0 ? "block" : "none";
@@ -177,17 +161,15 @@ function addToProject(id, name, price) {
 function updateCart() {
   const container = document.getElementById("cart-items");
   let total = 0;
-  if (projectCart.length === 0) { container.innerHTML = '<p style="color:#999;">Select units...</p>'; document.getElementById("project-total").innerText = "0.00"; return; }
+  if (projectCart.length === 0) { container.innerHTML = '<p style="color:#999;">Cart empty...</p>'; return; }
   container.innerHTML = projectCart.map(item => {
     total += item.price * item.qty;
-    return `<div class="cart-item"><span><b>${item.name}</b><br><small>Qty: ${item.qty}</small></span><b>$${(item.price*item.qty).toFixed(2)}</b></div>`;
+    return `<div style="font-size:0.8rem; border-bottom:1px solid #eee; padding:5px 0;">${item.name} x${item.qty}</div>`;
   }).join("");
   document.getElementById("project-total").innerText = total.toFixed(2);
 }
 
-function clearCart() { projectCart = []; updateCart(); }
 function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Quote.pdf"); }
-
 search();
 </script>
 </body>
