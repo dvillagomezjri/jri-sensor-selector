@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JRI Project Configurator v2.37</title>
+  <title>JRI Project Configurator v2.38</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
   <style>
     :root { --jri-blue: #005596; --jri-green: #4CAF50; --bg: #f4f6f8; --nova: #ff9800; --nano: #2196f3; --lora: #673ab7; }
@@ -53,9 +53,8 @@
     .btn-primary { width: 100%; background: var(--jri-blue); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
     select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e0; margin-bottom: 12px; font-size: 0.8rem; }
 
-    .library-section { border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px; }
-    .library-label { font-size: 0.75rem; font-weight: bold; color: #666; margin-bottom: 5px; display: block; }
-    
+    .no-results { grid-column: 1 / -1; text-align: center; padding: 40px; background: #fff; border: 2px dashed #ccc; border-radius: 10px; color: #777; font-weight: bold; }
+
     .project-cart { position: sticky; top: 15px; height: fit-content; border-left: 3px solid var(--jri-blue); }
     .total-box { margin-top: 15px; font-size: 1.1rem; font-weight: bold; color: var(--jri-blue); border-top: 2px solid var(--jri-blue); padding-top: 8px; }
   </style>
@@ -66,7 +65,7 @@
     <img src="JRI-LOGO-BLEU-complet.png" alt="JRI Logo" class="logo">
     <div>
       <h1 style="color: var(--jri-blue); margin:0; font-size: 1.3rem;">JRI Project Configurator</h1>
-      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.37 | Full Catalog Integration</p>
+      <p style="color: #666; margin: 0; font-size: 0.8rem;">v2.38 | Smart Unit Conversion (C/F)</p>
     </div>
   </header>
 
@@ -74,8 +73,8 @@
     <div class="controls">
       <label style="font-weight: bold;">Units</label>
       <div class="toggle-group">
-        <input type="radio" id="unitC" name="unit" value="C" checked><label for="unitC">°Celsius</label>
-        <input type="radio" id="unitF" name="unit" value="F"><label for="unitF">°Fahrenheit</label>
+        <input type="radio" id="unitC" name="unit" value="C" checked onchange="search()"><label for="unitC">°Celsius</label>
+        <input type="radio" id="unitF" name="unit" value="F" onchange="search()"><label for="unitF">°Fahrenheit</label>
       </div>
 
       <label style="font-weight: bold;">Temp Range</label>
@@ -95,10 +94,10 @@
       </div>
       
       <button class="btn-primary" onclick="search()">Update Search Results</button>
-
-      <div class="library-section">
-        <span class="library-label">🛠️ Hardware Reference (Full List)</span>
-        <select id="hardwareRef" style="margin-bottom:5px;"></select>
+      
+      <div class="library-section" style="margin-top:20px; border-top:1px solid #ddd; padding-top:10px;">
+        <span style="font-size:0.7rem; color:#888;">Hardware Reference List</span>
+        <select id="hardwareRef" style="font-size:0.75rem; height:30px; margin-top:5px;"></select>
       </div>
     </div>
 
@@ -118,61 +117,59 @@
 </div>
 
 <script>
+// Logic: Units and Probes updated with pure numerical ranges for calculation
 const baseUnits = [
-  {ref:"13763X", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, acc:"±0.4°C", hum:false, score: 10},
+  {ref:"13763X", name:"Nova SPY T Ambient", tech:"nova", price: 154, img:"Nova SPY T Ambient.png", input:"fixed", min:-40, max:80, accNum:0.4, hum:false, score: 10},
   {ref:"13756X", name:"Nova SPY Digital", tech:"nova", price: 166, img:"Nova SPY Digital.png", input:"digital", score: 5},
-  {ref:"11567X", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, acc:"±0.3°C", hum:false, score: 10},
-  {ref:"11568X", name:"Nano SPY TH Ambient", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
-  {ref:"13240X", name:"Nano SPY TH Precision", tech:"nano", price: 215, img:"Nano SPY TH.png", input:"fixed", min:-40, max:85, acc:"±0.2°C / 2%RH", hum:true, score: 10},
-  {ref:"11569X", name:"Nano SPY T2 (External)", tech:"nano", price: 125, img:"Nano SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.2°C", hum:false, score: 10},
+  {ref:"11567X", name:"Nano SPY T1", tech:"nano", price: 119, img:"Nano SPY T1.png", input:"fixed", min:-40, max:85, accNum:0.3, hum:false, score: 10},
+  {ref:"11568X", name:"Nano SPY TH Ambient", tech:"nano", price: 188, img:"Nano SPY TH.png", input:"fixed", min:-30, max:70, accNum:0.4, hum:true, score: 10},
+  {ref:"13240X", name:"Nano SPY TH Precision", tech:"nano", price: 215, img:"Nano SPY TH.png", input:"fixed", min:-40, max:85, accNum:0.2, hum:true, score: 10},
+  {ref:"11569X", name:"Nano SPY T2 (External)", tech:"nano", price: 125, img:"Nano SPY T2.png", input:"fixed", min:-50, max:105, accNum:0.2, hum:false, score: 10},
   {ref:"12540X", name:"Nano SPY Universal (U)", tech:"nano", price: 245, img:"Nano SPY U.png", input:"analog", score: 4},
   {ref:"13491X", name:"Nano SPY Digital", tech:"nano", price: 160, img:"Nano SPY Digital.png", input:"digital", score: 5},
-  {ref:"12266X", name:"LoRa SPY T0", tech:"lora", price: 230, img:"LoRa SPY T1.png", input:"fixed", min:-35, max:85, acc:"±0.5°C", hum:false, score: 10},
-  {ref:"12267X", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.4°C", hum:false, score: 10},
-  {ref:"12269X", name:"LoRa SPY T2", tech:"lora", price: 260, img:"LoRa SPY T2.png", input:"fixed", min:-50, max:105, acc:"±0.3°C", hum:false, score: 10},
-  {ref:"12273X", name:"LoRa SPY T3 (Low Temp)", tech:"lora", price: 275, img:"LoRa SPY T3.png", input:"fixed", min:-200, max:0, acc:"±0.2°C", hum:false, score: 10},
-  {ref:"12268X", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, acc:"±0.4°C / 2%RH", hum:true, score: 10},
-  {ref:"12409X", name:"LoRa SPY Reference", tech:"lora", price: 380, img:"LoRa SPY T1.png", input:"fixed", min:-196, max:200, acc:"±0.12°C", hum:false, score: 9},
-  {ref:"12484X", name:"LoRa TEMP", tech:"lora", price: 220, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, acc:"±0.5°C", hum:false, score: 7},
+  {ref:"12266X", name:"LoRa SPY T0", tech:"lora", price: 230, img:"LoRa SPY T1.png", input:"fixed", min:-35, max:85, accNum:0.5, hum:false, score: 10},
+  {ref:"12267X", name:"LoRa SPY T1", tech:"lora", price: 242, img:"LoRa SPY T1.png", input:"fixed", min:-30, max:70, accNum:0.4, hum:false, score: 10},
+  {ref:"12269X", name:"LoRa SPY T2", tech:"lora", price: 260, img:"LoRa SPY T2.png", input:"fixed", min:-50, max:105, accNum:0.3, hum:false, score: 10},
+  {ref:"12273X", name:"LoRa SPY T3 (Low Temp)", tech:"lora", price: 275, img:"LoRa SPY T3.png", input:"fixed", min:-200, max:0, accNum:0.2, hum:false, score: 10},
+  {ref:"12268X", name:"LoRa SPY TH", tech:"lora", price: 335, img:"LoRa SPY TH.png", input:"fixed", min:-30, max:70, accNum:0.4, hum:true, score: 10},
+  {ref:"12409X", name:"LoRa SPY Reference", tech:"lora", price: 380, img:"LoRa SPY T1.png", input:"fixed", min:-196, max:200, accNum:0.12, hum:false, score: 9},
   {ref:"12276X", name:"LoRa SPY Digital", tech:"lora", price: 270, img:"LoRa SPY Digital.png", input:"digital", score: 5},
   {ref:"11810X", name:"LoRa SPY Universal (U)", tech:"lora", price: 357, img:"LoRa SPY U.png", input:"analog", score: 4}
 ];
 
 const probes = [
-  {ref:"13984", name:"Green Digital Low Temp", min:-200, max:0, acc:"±0.2°C", price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
-  {ref:"13947", name:"Green Digital Ref", min:-90, max:180, acc:"±0.15°C", price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
-  {ref:"14129", name:"Green Digital Ref Short", min:-40, max:80, acc:"±0.15°C", price: 175, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
-  {ref:"13993", name:"Green Digital Temp Long", min:-40, max:80, acc:"±0.2°C", price: 150, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
-  {ref:"12347", name:"Green Digital TH Sensor", min:-30, max:70, acc:"±0.3°C / 2%RH", price: 210, type:"digital", img:"12347 Green Digital Temperature and Humidity Sensor.png", hum:true, cable: true},
-  {ref:"12366", name:"Industrial TH Enclosure", min:-100, max:200, acc:"±0.2°C / 2%RH", price: 345, type:"analog", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
-  {ref:"12367", name:"Industrial TH Ambient", min:-40, max:60, acc:"±0.2°C / 2%RH", price: 310, type:"analog", img:"12367 Precision TH transmitter – Industrial ambient.png", hum:true, cable: false},
-  {ref:"05891", name:"High-Precision PT100", min:-200, max:260, acc:"±0.1°C", price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
-  {ref:"13572", name:"Autoclave PT100", min:-50, max:180, acc:"Class A", price: 190, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
-  {ref:"13264", name:"Industrial PT100 High-Temp", min:-50, max:700, acc:"Class A", price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true},
-  {ref:"06154", name:"PT100 Bending Spring", min:-50, max:450, acc:"Class A", price: 185, type:"analog", img:"06154 PT100 high-temperature sensor with bending spring.png", cable: true},
-  {ref:"05836", name:"Immersion PT100", min:-50, max:180, acc:"Class A", price: 170, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
-  {ref:"13357", name:"Thin PT100 Probe", min:-50, max:600, acc:"±0.1°C", price: 198, type:"analog", img:"13357 Thin PT100 probe.png", cable: true},
-  {ref:"05936", name:"Penetration PT100", min:-60, max:180, acc:"Class A", price: 165, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true}
+  {ref:"13984", name:"Green Digital Low Temp", min:-200, max:0, accNum:0.2, price: 195, type:"digital", img:"13984 Green Digital Low Temperature Sensor.png", cable: true},
+  {ref:"13947", name:"Green Digital Ref", min:-90, max:180, accNum:0.15, price: 188, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
+  {ref:"14129", name:"Green Digital Ref Short", min:-40, max:80, accNum:0.15, price: 175, type:"digital", img:"13947 Green Digital Sensor Reference.png", cable: true},
+  {ref:"12347", name:"Green Digital TH Sensor", min:-30, max:70, accNum:0.3, price: 210, type:"digital", img:"12347 Green Digital Temperature and Humidity Sensor.png", hum:true, cable: true},
+  {ref:"12366", name:"Industrial TH Enclosure", min:-100, max:200, accNum:0.2, price: 345, type:"analog", img:"12366 Precision TH transmitter – Industrial enclosure.png", hum:true, cable: true},
+  {ref:"05891", name:"High-Precision PT100", min:-200, max:260, accNum:0.1, price: 210, type:"analog", img:"05891 High-precision PT100 probe.png", cable: true},
+  {ref:"13264", name:"Industrial PT100 High-Temp", min:-50, max:700, accNum:0.1, price: 132, type:"analog", img:"13264 PT100 high-temperature sensor for industrial.png", cable: true}
 ];
 
 const cablePricing = { "3m": 0, "10m": 15, "25m": 45 };
 let projectCart = [];
 
-function populateLibrary() {
-  const lib = document.getElementById("hardwareRef");
-  let html = '<option>Select for Reference Only...</option><optgroup label="Recorders">';
-  baseUnits.forEach(b => html += `<option>${b.ref} - ${b.name}</option>`);
-  html += '</optgroup><optgroup label="Probes">';
-  probes.forEach(p => html += `<option>${p.ref} - ${p.name}</option>`);
-  html += '</optgroup>';
-  lib.innerHTML = html;
+function convertT(val, isUnitF) {
+  if (!isUnitF) return val.toFixed(1) + "°C";
+  return ((val * 9/5) + 32).toFixed(1) + "°F";
+}
+
+function convertAcc(val, isUnitF) {
+  if (!isUnitF) return "±" + val.toFixed(2) + "°C";
+  return "±" + (val * 1.8).toFixed(2) + "°F";
 }
 
 function search(){
   const unit = document.querySelector('input[name="unit"]:checked').value;
+  const isF = (unit === "F");
   let fMin = parseFloat(document.getElementById("minTemp").value);
   let fMax = parseFloat(document.getElementById("maxTemp").value);
-  if (unit === "F") { fMin = (fMin - 32) * 5/9; fMax = (fMax - 32) * 5/9; }
+  
+  // Logic: Always evaluate internal matching in Celsius
+  let searchMin = isF ? (fMin - 32) * 5/9 : fMin;
+  let searchMax = isF ? (fMax - 32) * 5/9 : fMax;
+  
   const humReq = document.getElementById("humidity").value === "yes";
   const sTechs = Array.from(document.querySelectorAll('input[name="tech"]:checked')).map(cb => cb.value);
 
@@ -180,26 +177,35 @@ function search(){
   baseUnits.forEach(base => {
     if (!sTechs.includes(base.tech)) return;
     if (base.input === "fixed") {
-      if (base.min <= fMin && base.max >= fMax && (!humReq || base.hum)) {
-        matches.push({ id: base.ref, fullName: base.name, tech: base.tech, recR: base.ref, recP: base.price, probeR: "", probeP: 0, baseImg: base.img, score: base.score, min: base.min, max: base.max, acc: base.acc, hasCable: false });
+      if (base.min <= searchMin && base.max >= searchMax && (!humReq || base.hum)) {
+        matches.push({ id: base.ref, fullName: base.name, tech: base.tech, recR: base.ref, recP: base.price, probeR: "", probeP: 0, baseImg: base.img, score: base.score, min: base.min, max: base.max, acc: base.accNum, hasCable: false });
       }
     } else {
       probes.forEach(p => {
-        if (p.type === base.input && p.min <= fMin && p.max >= fMax && (!humReq || p.hum)) {
-          matches.push({ id: base.ref + "-" + p.ref, fullName: `${base.name} + ${p.name}`, tech: base.tech, recR: base.ref, recP: base.price, probeR: p.ref, probeP: p.price, baseImg: base.img, probeImg: p.img, score: base.score, min: p.min, max: p.max, acc: p.acc, hasCable: p.cable });
+        if (p.type === base.input && p.min <= searchMin && p.max >= searchMax && (!humReq || p.hum)) {
+          matches.push({ id: base.ref + "-" + p.ref, fullName: `${base.name} + ${p.name}`, tech: base.tech, recR: base.ref, recP: base.price, probeR: p.ref, probeP: p.price, baseImg: base.img, probeImg: p.img, score: base.score, min: p.min, max: p.max, acc: p.accNum, hasCable: p.cable });
         }
       });
     }
   });
 
-  renderList(matches.filter(m => m.score >= 8), "recommendations", true);
-  renderList(matches.filter(m => m.score < 8), "results", false);
+  renderList(matches.filter(m => m.score >= 8), "recommendations", true, isF);
+  renderList(matches.filter(m => m.score < 8), "results", false, isF);
 }
 
-function renderList(list, id, highlight) {
+function renderList(list, id, highlight, isF) {
   const container = document.getElementById(id);
+  if (list.length === 0) {
+    container.innerHTML = highlight ? '' : '<div class="no-results">❌ Sorry, No Matching Results for these criteria.</div>';
+    container.parentElement.style.display = highlight ? "none" : "block";
+    return;
+  }
+
   container.innerHTML = list.map(m => {
     const uniqueId = m.id.replace(/\W/g, '');
+    const displayRange = `${convertT(m.min, isF)} to ${convertT(m.max, isF)}`;
+    const displayAcc = convertAcc(m.acc, isF);
+
     return `
     <div class="card ${highlight ? 'highlight' : ''}">
       <div class="visual-header">
@@ -210,7 +216,7 @@ function renderList(list, id, highlight) {
       <b>${m.fullName}</b>
       <div class="ref-line">Ref: #${m.recR}${m.probeR ? ' + #' + m.probeR : ''}</div>
       <div class="breakdown">
-        <div><strong>Range:</strong> ${m.min}/${m.max}°C | <strong>Acc:</strong> ${m.acc}</div>
+        <div><strong>Range:</strong> ${displayRange} <br> <strong>Acc:</strong> ${displayAcc}</div>
         <div class="price-row" style="margin-top:5px;"><span>Recorder:</span><span>$${m.recP.toFixed(2)}</span></div>
         ${m.probeP > 0 ? `<div class="price-row"><span>Probe:</span><span>$${m.probeP.toFixed(2)}</span></div>` : ''}
         ${m.hasCable ? `
@@ -224,7 +230,7 @@ function renderList(list, id, highlight) {
       <button class="add-btn" onclick="addToProject('${m.id}', '${m.fullName}', ${m.recP}, ${m.probeP}, '${uniqueId}', ${m.hasCable})">Add to Project +</button>
     </div>`;
   }).join("");
-  container.parentElement.style.display = list.length > 0 ? "block" : "none";
+  container.parentElement.style.display = "block";
 }
 
 function updateCardPrice(uid, recP, probeP) {
@@ -258,7 +264,13 @@ function updateCart() {
 function clearCart() { projectCart = []; updateCart(); }
 function exportPDF() { html2pdf().from(document.getElementById('project-list')).save("JRI_Config_Quote.pdf"); }
 
-populateLibrary();
+// Init Library
+const lib = document.getElementById("hardwareRef");
+let libHtml = '<option>Select Ref...</option><optgroup label="Recorders">';
+baseUnits.forEach(b => libHtml += `<option>${b.ref} - ${b.name}</option>`);
+libHtml += '</optgroup><optgroup label="Probes">';
+probes.forEach(p => libHtml += `<option>${p.ref} - ${p.name}</option>`);
+lib.innerHTML = libHtml;
 </script>
 </body>
 </html>
